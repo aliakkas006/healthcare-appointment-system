@@ -1,0 +1,81 @@
+version: '3.8'
+
+services:
+  auth-service:
+    build:
+      context: ./services/auth
+      dockerfile: Dockerfile
+    ports:
+      - '4003:8080'
+    volumes:
+      - ./services/auth:/app
+    networks:
+      - auth-network
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: postgres
+    ports:
+      - '5432:5432'
+    networks:
+      - auth-network
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD', 'pg_isready', '-U', 'auth']
+      interval: 30s
+      timeout: 30s
+      retries: 3
+
+  pgadmin:
+    image: dpage/pgadmin4
+    restart: on-failure
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_PASSWORD: password
+    ports:
+      - '5050:80'
+    networks:
+      - auth-network
+    depends_on:
+      - postgres
+
+  redis-stack:
+    image: redis/redis-stack:latest
+    environment:
+      - REDIS_ARGS=--save 900 1
+    ports:
+      - '6379:6379'
+      - '8001:8001'
+    networks:
+      - auth-network
+    volumes:
+      - redis-data:/var/lib/redis-stack
+
+  rabbitmq:
+    image: rabbitmq:3.8-management
+    ports:
+      - '5672:5672'
+      - '15672:15672'
+    networks:
+      - auth-network
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+
+
+
+  # ------------------------------------------
+
+networks:
+  auth-network:
+    driver: bridge
+
+volumes:
+  postgres-data:
+  redis-data:
+  rabbitmq-data:
