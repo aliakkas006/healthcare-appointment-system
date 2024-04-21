@@ -1,6 +1,7 @@
 version: '3.8'
 
 services:
+  # Auth Service --------------------------------
   auth-service:
     build:
       context: ./services/auth
@@ -12,10 +13,27 @@ services:
     volumes:
       - ./services/auth:/app
     networks:
-      - auth-network
+      - healthcare-appointment-system-network
     depends_on:
       - postgres
 
+  # User Service --------------------------------
+  user-service:
+    build:
+      context: ./services/user
+      dockerfile: Dockerfile
+    ports:
+      - '4000:8080'
+    environment:
+      - DATABASE_URL=postgresql://admin:password@postgres:5432/user_db?schema=public
+    volumes:
+      - ./services/user:/app
+    networks:
+      - healthcare-appointment-system-network
+    depends_on:
+      - postgres
+
+  # PostgreSQL Database -----------------------------------
   postgres:
     image: postgres:latest
     environment:
@@ -25,7 +43,7 @@ services:
     ports:
       - '5432:5432'
     networks:
-      - auth-network
+      - healthcare-appointment-system-network
     volumes:
       - postgres-data:/var/lib/postgresql/data
     healthcheck:
@@ -34,6 +52,7 @@ services:
       timeout: 30s
       retries: 3
 
+  # PgAdmin ------------------------------------
   pgadmin:
     image: dpage/pgadmin4
     restart: on-failure
@@ -43,10 +62,11 @@ services:
     ports:
       - '5050:80'
     networks:
-      - auth-network
+      - healthcare-appointment-system-network
     depends_on:
       - postgres
 
+  # Redis-Stack -------------------------------
   redis-stack:
     image: redis/redis-stack:latest
     environment:
@@ -55,24 +75,25 @@ services:
       - '6379:6379'
       - '8001:8001'
     networks:
-      - auth-network
+      - healthcare-appointment-system-network
     volumes:
       - redis-data:/var/lib/redis-stack
 
+  # RabbitMQ -----------------------------------
   rabbitmq:
     image: rabbitmq:3.8-management
     ports:
       - '5672:5672'
       - '15672:15672'
     networks:
-      - auth-network
+      - healthcare-appointment-system-network
     volumes:
       - rabbitmq-data:/var/lib/rabbitmq
 
   # ------------------------------------------
 
 networks:
-  auth-network:
+  healthcare-appointment-system-network:
     driver: bridge
 
 volumes:

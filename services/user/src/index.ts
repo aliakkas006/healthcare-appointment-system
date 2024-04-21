@@ -4,8 +4,8 @@ import app from './app';
 
 const server = http.createServer(app);
 
-const port = process.env.PORT || 4003;
-const serviceName = process.env.SERVICE_NAME || 'Auth-Service';
+const port = process.env.PORT || 4000;
+const serviceName = process.env.SERVICE_NAME || 'User-Service';
 
 server.listen(port, () => {
   console.log(
