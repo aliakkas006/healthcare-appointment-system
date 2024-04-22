@@ -2,36 +2,55 @@ version: '3.8'
 
 services:
   # Auth Service --------------------------------
-  auth-service:
-    build:
-      context: ./services/auth
-      dockerfile: Dockerfile
-    ports:
-      - '4003:8080'
-    environment:
-      - DATABASE_URL=postgresql://admin:password@postgres:5432/auth_db?schema=public
-    volumes:
-      - ./services/auth:/app
-    networks:
-      - healthcare-appointment-system-network
-    depends_on:
-      - postgres
+  # auth:
+  #   build:
+  #     context: ./services/auth
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - '4003:8080'
+  #   environment:
+  #     - DATABASE_URL=postgresql://admin:password@postgres:5432/auth_db?schema=public
+  #   volumes:
+  #     - ./services/auth:/app
+  #   networks:
+  #     - healthcare-appointment-system-network
+  #   depends_on:
+  #     - postgres
 
   # User Service --------------------------------
-  user-service:
+  # user:
+  #   build:
+  #     context: ./services/user
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - '4000:8080'
+  #   environment:
+  #     - DATABASE_URL=postgresql://admin:password@postgres:5432/user_db?schema=public
+  #   volumes:
+  #     - ./services/user:/app
+  #   networks:
+  #     - healthcare-appointment-system-network
+  #   depends_on:
+  #     - postgres
+
+  # Email Service -------------------------------
+  email:
     build:
-      context: ./services/user
+      context: ./services/email
       dockerfile: Dockerfile
     ports:
-      - '4000:8080'
+      - '4006:8080'
     environment:
-      - DATABASE_URL=postgresql://admin:password@postgres:5432/user_db?schema=public
+      - DATABASE_URL=postgresql://admin:password@postgres:5432/email_db?schema=public
+      - SMTP_HOST=mailhog
+      - SMTP_PORT=1025
     volumes:
-      - ./services/user:/app
+      - ./services/email:/app
     networks:
       - healthcare-appointment-system-network
     depends_on:
       - postgres
+      - mailhog
 
   # PostgreSQL Database -----------------------------------
   postgres:
@@ -67,28 +86,39 @@ services:
       - postgres
 
   # Redis-Stack -------------------------------
-  redis-stack:
-    image: redis/redis-stack:latest
-    environment:
-      - REDIS_ARGS=--save 900 1
-    ports:
-      - '6379:6379'
-      - '8001:8001'
-    networks:
-      - healthcare-appointment-system-network
-    volumes:
-      - redis-data:/var/lib/redis-stack
+  # redis-stack:
+  #   image: redis/redis-stack:latest
+  #   environment:
+  #     - REDIS_ARGS=--save 900 1
+  #   ports:
+  #     - '6379:6379'
+  #     - '8001:8001'
+  #   networks:
+  #     - healthcare-appointment-system-network
+  #   volumes:
+  #     - redis-data:/var/lib/redis-stack
 
   # RabbitMQ -----------------------------------
-  rabbitmq:
-    image: rabbitmq:3.8-management
+  # rabbitmq:
+  #   image: rabbitmq:3.8-management
+  #   ports:
+  #     - '5672:5672'
+  #     - '15672:15672'
+  #   networks:
+  #     - healthcare-appointment-system-network
+  #   volumes:
+  #     - rabbitmq-data:/var/lib/rabbitmq
+
+  # MailHog -----------------------------------
+  mailhog:
+    image: mailhog/mailhog
     ports:
-      - '5672:5672'
-      - '15672:15672'
+      - '1025:1025' # SMTP port
+      - '8025:8025' # Web UI (HTTP) port
     networks:
       - healthcare-appointment-system-network
     volumes:
-      - rabbitmq-data:/var/lib/rabbitmq
+      - mailhog-data:/var/lib/mailhog
 
   # ------------------------------------------
 
@@ -100,3 +130,4 @@ volumes:
   postgres-data:
   redis-data:
   rabbitmq-data:
+  mailhog-data:
