@@ -1,0 +1,59 @@
+{
+  "services": {
+    "user": {
+      "url": "http://user:8080",
+      "routes": [
+        {
+          "path": "/users",
+          "methods": ["get", "post"],
+          "middlewares": []
+        },
+        {
+          "path": "/users/:id",
+          "methods": ["get", "put", "delete"],
+          "middlewares": []
+        }
+      ]
+    },
+    "email": {
+      "url": "http://email:8080",
+      "routes": [
+        {
+          "path": "/emails",
+          "methods": ["get"],
+          "middlewares": ["auth"]
+        },
+        {
+          "path": "/emails/send",
+          "methods": ["post"],
+          "middlewares": ["auth"]
+        }
+      ]
+    },
+    "auth": {
+      "url": "http://auth:8080",
+      "routes": [
+        {
+          "path": "/auth/register",
+          "methods": ["post"],
+          "middlewares": []
+        },
+        {
+          "path": "/auth/login",
+          "methods": ["post"],
+          "middlewares": []
+        },
+        {
+          "path": "/auth/verify-token",
+          "methods": ["post"],
+          "middlewares": []
+        },
+        {
+          "path": "/auth/verify-email",
+          "methods": ["post"],
+          "middlewares": []
+        }
+      ]
+    }
+  }
+}

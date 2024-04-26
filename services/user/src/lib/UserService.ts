@@ -1,9 +1,9 @@
 import prisma from '@/prisma';
-// import { User } from '@prisma/client';
+import { User } from '@prisma/client';
 
 class UserService {
   /**
-   * Check if the auth user already exists
+   * Check if the authUserId already exists
    * @param authUserId
    */
   public async checkExistingUser(authUserId: string) {
@@ -32,7 +32,7 @@ class UserService {
    * @param field
    */
   public async getUserById(id: string, field: string) {
-    let user: any = null;
+    let user: User | null;
 
     if (field === 'authUserId') {
       user = await prisma.user.findUnique({ where: { authUserId: id } });
@@ -67,6 +67,14 @@ class UserService {
     });
 
     return deletedUser;
+  }
+
+  /**
+   * Get all users
+   * @returns {Promise<User[]>}
+   */
+  public async getUsers(): Promise<User[]> {
+    return prisma.user.findMany();
   }
 }
 

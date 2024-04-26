@@ -19,7 +19,7 @@ class UserLoginService {
   }
 
   /**
-   * Login user
+   * Login user with email and password
    */
   public async login(email: string, password: string) {
     // check if the user exists

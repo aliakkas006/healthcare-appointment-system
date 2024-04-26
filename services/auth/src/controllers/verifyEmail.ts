@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { EmailVerificationSchema } from '@/schemas';
-import verifyEmailService from '@/lib/VerifyEmailService';
+import emailService from '@/lib/EmailService';
 
 const verifyEmail = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -14,19 +14,19 @@ const verifyEmail = async (req: Request, res: Response, next: NextFunction) => {
     const { email, code } = parsedBody.data;
 
     // Verify the user email
-    const { user, verificationCode } = await verifyEmailService.verifyUserEmail(
+    const { user, verificationCode } = await emailService.verifyUserEmail(
       email,
       code
     );
 
     // Update user status to verified
-    await verifyEmailService.updateUserStatus(user.id);
+    await emailService.updateUserStatus(user.id);
 
     // Update verification code status to used
-    await verifyEmailService.updateVerificationCodeStatus(verificationCode.id);
+    await emailService.updateVerificationCodeStatus(verificationCode.id);
 
     // Send verification success email
-    await verifyEmailService.sendVerificationSuccessEmail(user.email);
+    await emailService.sendVerificationSuccessEmail(user.email);
 
     // Return success response
     return res.status(200).json({ message: 'Email verified successfully!' });
