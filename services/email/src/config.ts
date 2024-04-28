@@ -7,3 +7,6 @@ export const transporter = nodemailer.createTransport({
 
 export const defaultSender =
   process.env.DEFAULT_SENDER_EMAIL || 'admin@gmail.com';
+
+export const RABBITMQ_URL =
+  process.env.RABBITMQ_URL || 'amqp://guest:guest@rabbitmq:5672';

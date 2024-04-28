@@ -1,0 +1,66 @@
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum AppointmentType {
+  CONSULTATION
+  FOLLOWUP
+}
+
+enum Status {
+  SCHEDULED
+  CONFIRMED
+  CANCELLED
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+model Appointment {
+  id           String             @id @default(cuid())
+  patientId    String             @unique
+  providerId   String             @unique
+  patientEmail String             @unique
+  type         AppointmentType    @default(CONSULTATION)
+  status       Status             @default(SCHEDULED)
+  notes        String
+  date         String
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+
+  patient      Patient            @relation(fields: [patientId], references: [id])
+  provider     HealthcareProvider @relation(fields: [providerId], references: [id])
+}
+
+model Patient {
+  id                   String         @id @default(cuid())
+  userId               String         @unique
+  patientName          String  
+  dateOfBirth          String       
+  gender               Gender         @default(MALE)
+  medicalHistory       String
+  insuranceInformation String
+  createdAt            DateTime       @default(now())
+  updatedAt            DateTime       @updatedAt
+  appointments         Appointment[]
+}
+
+model HealthcareProvider {
+  id                 String         @id @default(cuid())
+  userId             String         @unique
+  providerName       String
+  speciality         String
+  contactInformation String
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+  appointments       Appointment[]
+}

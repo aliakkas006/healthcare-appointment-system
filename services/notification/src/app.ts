@@ -1,8 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
-import routes from '@/routes';
-import '@/receiver/appointmentReceiver';
+// import notificationService from '@/lib';
 
 const app = express();
 
@@ -13,8 +12,10 @@ app.get('/health', (_req, res) => {
   res.status(200).json({ status: 'UP' });
 });
 
-// Routes
-app.use(routes);
+// Handle incoming notifications
+// notificationService.handleNotification((notification) => {
+//   notificationService.processNotification(notification);
+// });
 
 // 404 handler
 app.use((_req, res) => {

@@ -22,7 +22,7 @@ class EmailService {
       },
     });
 
-    console.log('verificationCode', verificationCode);
+    console.log('verificationCode: ', verificationCode);
 
     if (!verificationCode) {
       throw new Error('Invalid verification code');

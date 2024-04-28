@@ -58,6 +58,43 @@ services:
     depends_on:
       - postgres
 
+  # Appointment Service -------------------------
+  appointment:
+    build:
+      context: ./services/appointment
+      dockerfile: Dockerfile
+    ports:
+      - '4001:8080'
+    environment:
+      - DATABASE_URL=postgresql://admin:password@postgres:5432/appointment_db?schema=public
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
+    volumes:
+      - ./services/appointment:/app
+    networks:
+      - healthcare-appointment-system-network
+    depends_on:
+      - postgres
+      - email
+      - rabbitmq
+
+  # Notification Service -------------------------------
+  notification:
+    build:
+      context: ./services/notification
+      dockerfile: Dockerfile
+    ports:
+      - '4005:8080'
+    environment:
+      - DATABASE_URL=postgresql://admin:password@postgres:5432/notification_db?schema=public
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
+    volumes:
+      - ./services/notification:/app
+    networks:
+      - healthcare-appointment-system-network
+    depends_on:
+      - postgres
+      - rabbitmq
+
   # Email Service -------------------------------
   email:
     build:
@@ -115,6 +152,8 @@ services:
     image: redis/redis-stack:latest
     environment:
       - REDIS_ARGS=--save 900 1
+      - REDIS_HOST=redis-stack
+      - REDIS_PORT=6379
     ports:
       - '6379:6379'
       - '8001:8001'
@@ -127,8 +166,8 @@ services:
   rabbitmq:
     image: rabbitmq:3.8-management
     ports:
-      - '5672:5672'
-      - '15672:15672'
+      - '5672:5672' # AMQP port
+      - '15672:15672' # HTTP port
     networks:
       - healthcare-appointment-system-network
     volumes:

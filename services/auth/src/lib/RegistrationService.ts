@@ -58,15 +58,13 @@ class RegistrationService {
    * Create the user profile by calling the user service.
    */
   public async createUserProfile(userId: string, name: string, email: string) {
-    console.log("USER_SERVICE", USER_SERVICE);
-
     const user = await axios.post(`${USER_SERVICE}/users`, {
       authUserId: userId,
       name,
       email,
     });
 
-    console.log("USER", user.data);
+    console.log('USER:', user.data);
     return user;
   }
 

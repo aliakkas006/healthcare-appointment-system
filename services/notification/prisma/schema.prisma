@@ -1,0 +1,33 @@
+
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum NotificationType {
+  CONFIRMATION
+  REMINDER
+  CANCELATION
+}
+
+enum Status {
+  SENT
+  READ
+  UNREAD
+}
+
+model Notification {
+  id        String            @id @default(cuid())
+  userId    String            @unique
+  type      NotificationType  @default(CONFIRMATION)
+  content   String   
+  status    Status            @default(UNREAD)
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+
+}
