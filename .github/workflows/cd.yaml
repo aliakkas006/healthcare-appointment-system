@@ -1,0 +1,107 @@
+name: Build, Test and Push Docker Image
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  # run-tests:
+  #   runs-on: ubuntu-latest
+
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
+
+  #     - name: Set up Node.js
+  #       uses: actions/setup-node@v4
+  #       with:
+  #         node-version: '21'
+
+  #     - name: Test appointment service
+  #       run: |
+  #         cd services/appointment
+  #         yarn install --frozen-lockfile
+  #         yarn test
+
+  #     - name: Test user service
+  #       run: |
+  #         cd services/user
+  #         yarn install --frozen-lockfile
+  #         yarn test
+
+  #     - name: Test auth service
+  #       run: |
+  #         cd services/auth
+  #         yarn install --frozen-lockfile
+  #         yarn test
+
+  #     - name: Test email service
+  #       run: |
+  #         cd services/email
+  #         yarn install --frozen-lockfile
+  #         yarn test
+
+  build-and-push:
+    # needs: run-tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Qemu
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and push api-gateway
+        uses: docker/build-push-action@v5
+        with:
+          context: ./api-gateway
+          file: ./api-gateway/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/api-gateway:latest
+
+      - name: Build and push appointment service
+        uses: docker/build-push-action@v5
+        with:
+          context: ./services/appointment
+          file: ./services/appointment/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/appointment:latest
+
+      - name: Build and push user service
+        uses: docker/build-push-action@v5
+        with:
+          context: ./services/user
+          file: ./services/user/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/user:latest
+
+      - name: Build and push auth service
+        uses: docker/build-push-action@v5
+        with:
+          context: ./services/auth
+          file: ./services/auth/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/auth:latest
+
+      - name: Build and push email service
+        uses: docker/build-push-action@v5
+        with:
+          context: ./services/email
+          file: ./services/email/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/email:latest

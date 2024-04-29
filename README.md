@@ -40,7 +40,7 @@ Healthcare-Appointment-Scheduling-System/
 ## Setup
 follow .env.example file for setup environment variables
 
-### Run the `Docker Container`
+### Run the `Microservices Dependency`
 ```bash
 docker-compose up
 ```
