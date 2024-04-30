@@ -4,7 +4,8 @@ import loginService from '@/lib/LoginService';
 
 const login = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const ipAddress = (req.headers['x-forwarded-for'] as string) || req.ip || '';
+    const ipAddress =
+      (req.headers['x-forwarded-for'] as string) || req.ip || '';
     const userAgent = req.headers['user-agent'] || '';
 
     // Validate the request body

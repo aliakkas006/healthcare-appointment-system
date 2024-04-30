@@ -6,44 +6,7 @@ on:
       - main
 
 jobs:
-  # run-tests:
-  #   runs-on: ubuntu-latest
-
-  #   steps:
-  #     - name: Checkout code
-  #       uses: actions/checkout@v4
-
-  #     - name: Set up Node.js
-  #       uses: actions/setup-node@v4
-  #       with:
-  #         node-version: '21'
-
-  #     - name: Test appointment service
-  #       run: |
-  #         cd services/appointment
-  #         yarn install --frozen-lockfile
-  #         yarn test
-
-  #     - name: Test user service
-  #       run: |
-  #         cd services/user
-  #         yarn install --frozen-lockfile
-  #         yarn test
-
-  #     - name: Test auth service
-  #       run: |
-  #         cd services/auth
-  #         yarn install --frozen-lockfile
-  #         yarn test
-
-  #     - name: Test email service
-  #       run: |
-  #         cd services/email
-  #         yarn install --frozen-lockfile
-  #         yarn test
-
   build-and-push:
-    # needs: run-tests
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code

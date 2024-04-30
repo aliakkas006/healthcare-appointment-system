@@ -4,6 +4,41 @@ import axios from 'axios';
 
 class EmailService {
   /**
+   * Generates a random 5-digit verification code.
+   */
+  public generateVerificationCode() {
+    const randomNum = Math.floor(10000 + Math.random() * 90000);
+    return randomNum.toString();
+  }
+
+  /**
+   * Create verification code and save it to the database
+   */
+  public async createVerificationCode(userId: string, code: string) {
+    await prisma.verificationCode.create({
+      data: {
+        userId,
+        code,
+        expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24), // 24 hours
+      },
+    });
+  }
+
+  /**
+   * Send the verification email.
+   */
+  public async sendVerificationEmail(recipient: string, code: string) {
+    console.log('Sending verification email to:', recipient);
+
+    await axios.post(`${EMAIL_SERVICE}/emails/send`, {
+      recipient,
+      subject: 'Email Verification',
+      body: `Your verification code is ${code}`,
+      source: 'user-registration',
+    });
+  }
+
+  /**
    * Verify user email via verification code
    */
   public async verifyUserEmail(email: string, code: string) {
@@ -22,8 +57,6 @@ class EmailService {
       },
     });
 
-    console.log('verificationCode: ', verificationCode);
-
     if (!verificationCode) {
       throw new Error('Invalid verification code');
     }
@@ -35,7 +68,6 @@ class EmailService {
 
     return { user, verificationCode };
   }
-
   /**
    * Update user account status
    */

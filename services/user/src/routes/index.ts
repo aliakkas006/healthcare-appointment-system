@@ -13,6 +13,7 @@ router
   .get('/users/:id', getUserById)
   .put('/users/:id', updateUserById)
   .delete('/users/:id', deleteUserById);
+  
 router.post('/users', createUser).get('/users', getUsers);
 
 export default router;

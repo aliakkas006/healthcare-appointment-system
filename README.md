@@ -2,8 +2,8 @@
 
 ## [Basic System Desin](https://ali-akkas.notion.site/Healthcare-Appointment-Scheduling-System-cf67ead3bb1947f58f505c18fb886280?pvs=4)
 
-
 ## Overview
+
 - The Healthcare Appointment Scheduling System employs a microservices architecture with Docker containers for modularization and scalability.
 - CI/CD pipelines ensure automated and reliable deployment of updates and features.
 - RabbitMQ enables asynchronous communication between services, enhancing system resilience and responsiveness.
@@ -22,31 +22,100 @@
 - [Docker](https://www.docker.com/) - Docker is a platform designed to help developers build, share, and run container applications.
 - [Redis](https://redis.io/) - Redis is a source-available, in-memory storage, used as a distributed, in-memory key–value database, cache and message broker, with optional durability.
 - [RabbitMQ](https://www.rabbitmq.com/) - RabbitMQ is another widely used open source message broker, employed by several companies worldwide.
+- [GitHub Actions](https://github.com/features/actions) - GitHub Actions is a continuous integration and continuous delivery (CI/CD) platform that allows to automate build, test, and deployment pipeline.
+- [Postman](https://www.postman.com/) - Postman is an application that allows the testing of web APIs.
 
 ## File Structure
 
 ```
 Healthcare-Appointment-Scheduling-System/
 ├── .github
+        └── workflows
+                └── cd.yaml
 ├── api-gateway
 └── services/
-        ├── auth       
-        ├── user        
+        ├── auth/
+              ├── prisma
+              ├── src/
+                    ├── controllers
+                    ├── lib
+                    ├── routes
+                    ├── app.ts
+                    ├── index.ts
+                    ├── config.ts
+              ├── tests
+              ├── package.json
+              ├── Dockerfile
+        ├── user
+              ├── prisma
+              ├── src/
+                    ├── controllers
+                    ├── lib
+                    ├── routes
+                    ├── app.ts
+                    ├── index.ts
+                    ├── config.ts
+              ├── tests
+              ├── package.json
+              ├── Dockerfile
         ├── email
+              ├── prisma
+              ├── src/
+                    ├── controllers
+                    ├── lib
+                    ├── routes
+                    ├── app.ts
+                    ├── index.ts
+                    ├── config.ts
+              ├── tests
+              ├── package.json
+              ├── Dockerfile
         ├── appointment
+              ├── prisma
+              ├── src/
+                    ├── controllers
+                    ├── lib
+                    ├── routes
+                    ├── app.ts
+                    ├── index.ts
+                    ├── config.ts
+              ├── tests
+              ├── package.json
+              ├── Dockerfile
         ├── notification
+               ├── prisma
+              ├── src/
+                    ├── controllers
+                    ├── lib
+                    ├── routes
+                    ├── app.ts
+                    ├── index.ts
+                    ├── config.ts
+              ├── tests
+              ├── package.json
+              ├── Dockerfile
+├── docker-compose.yaml
+├── README.md
 ```
 
 ## Setup
+
 follow .env.example file for setup environment variables
 
 ### Run the `Microservices Dependency`
+
 ```bash
 docker-compose up
 ```
 
 ### Run the `Tests`
-```
+
+```bash
 yarn run test .\tests\**\**\*
 ```
 
+### Automatic `CI/CD`
+
+```
+When push the code in the GitHub automatic run the actions
+```

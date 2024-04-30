@@ -12,9 +12,9 @@ class TokenService {
   /**
    * Get user from access token
    */
-  public async getUserFromToken(decodedToken: any) {
+  public async getUserFromToken(decoded: any) {
     const user = await prisma.user.findUnique({
-      where: { id: decodedToken.id },
+      where: { id: (decoded as any).userId },
       select: {
         id: true,
         email: true,
@@ -22,6 +22,7 @@ class TokenService {
         role: true,
       },
     });
+
     return user;
   }
 }

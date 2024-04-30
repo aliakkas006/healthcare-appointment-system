@@ -17,11 +17,11 @@ router
   .post('/appointments', createAppointment)
   .get('/appointments', getAppointments);
 
-router.get('/appointments/:patientId', getAppointmentsByPatientId);
-
 router
   .get('/appointments/:id', getAppointmentById)
   .delete('/appointments/:id', deleteAppointmentById);
+
+router.get('/appointments/:patientId', getAppointmentsByPatientId);
 
 router.post('/patients', createPatient).get('/patients', getPatients);
 
