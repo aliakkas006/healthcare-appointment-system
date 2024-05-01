@@ -16,7 +16,7 @@ const router = Router();
 router
   .post('/appointments', createAppointment)
   .get('/appointments', getAppointments);
-
+  
 router
   .get('/appointments/:id', getAppointmentById)
   .delete('/appointments/:id', deleteAppointmentById);

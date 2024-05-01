@@ -10,11 +10,11 @@ const createAppointment = async (
   try {
     // Validate the request body
     const parsedBody = AppointmentCreateShcema.safeParse(req.body);
-
     if (!parsedBody.success) {
       return res.status(400).json({ message: parsedBody.error.errors });
     }
 
+    // Create the appointment
     const appointment = await appointmentService.createAppointment(
       parsedBody.data
     );

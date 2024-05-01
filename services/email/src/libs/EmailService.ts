@@ -40,7 +40,7 @@ class EmailService {
     const { patientEmail, date, status } = emailData;
     const from = defaultSender;
     const subject = 'Appointment Confirmation';
-    const body = `Thank you for your Appointment. Your appointment is ${status} ${date}`;
+    const body = `Thank you for your Appointment. Your appointment is ${status} at ${date}`;
 
     const emailOptions = {
       from,
@@ -64,6 +64,46 @@ class EmailService {
         subject,
         body,
         source: 'appointment',
+      });
+
+      console.log(`Email sent to ${patientEmail}`);
+    } catch (err) {
+      console.error('Error sending email:', err);
+      throw err;
+    }
+  }
+
+  /**
+   * Process email EHR
+   */
+  public async processEmailEHR(data: any) {
+    const { patientEmail, medications } = data;
+    const from = defaultSender;
+    const subject = 'EHR Confirmation';
+    const body = `Thank you for helping us with your Electronic Health Record (EHR). Your medications are ${medications}`;
+
+    const emailOptions = {
+      from,
+      to: patientEmail,
+      subject,
+      text: body,
+    };
+
+    // Send the email
+    try {
+      const { rejected } = await transporter.sendMail(emailOptions);
+
+      if (rejected.length) {
+        throw new Error(`Error sending email to ${rejected.join(',')}`);
+      }
+
+      // Save the email to the database
+      await this.saveEmailToDB({
+        sender: from,
+        recipient: patientEmail,
+        subject,
+        body,
+        source: 'EHR',
       });
 
       console.log(`Email sent to ${patientEmail}`);

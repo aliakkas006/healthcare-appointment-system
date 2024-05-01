@@ -1,0 +1,61 @@
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "windows"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+model EHR {
+  id                String     @id @default(cuid())
+  patientId         String
+  patientEmail      String
+  medicalHistories  String[]
+  allergies         String[]
+  medications       Medication[]
+  diagnosticReports DiagnosticReport[]
+
+  patient           Patient    @relation(fields: [patientId], references: [id])
+}
+
+model Patient {
+  id                   String         @id @default(cuid())
+  userId               String         @unique
+  patientName          String  
+  dateOfBirth          DateTime       
+  gender               Gender         @default(MALE)
+  medicalHistory       String
+  insuranceInformation String
+  createdAt            DateTime       @default(now())
+  updatedAt            DateTime       @updatedAt
+
+  ehr                  EHR[]
+}
+
+model Medication {
+  id         String   @id @default(cuid())
+  name       String
+  dosage     String
+  start_date DateTime
+  end_date   DateTime
+
+  ehr        EHR[]
+}
+
+model DiagnosticReport {
+  id         String   @id @default(cuid())
+  title      String
+  date       DateTime
+  findings     String
+
+  ehr        EHR[]
+}

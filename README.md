@@ -1,6 +1,9 @@
 # Healthcare Appointment Scheduling System
 
-## [Basic System Desin](https://ali-akkas.notion.site/Healthcare-Appointment-Scheduling-System-cf67ead3bb1947f58f505c18fb886280?pvs=4)
+## About
+Building Microservices Architecture using Docker, implementing CI/CD pipelines using GitHub Actions, incorporating asynchronous communication using RabbitMQ and caching with Redis. Additionally, implementing rate limiting, creating a custom API gateway or reverse proxy, and documenting system architecture.
+
+## [Basic System Architecture](https://ali-akkas.notion.site/Healthcare-Appointment-Scheduling-System-cf67ead3bb1947f58f505c18fb886280?pvs=4)
 
 ## Overview
 
@@ -118,4 +121,9 @@ yarn run test .\tests\**\**\*
 
 ```
 When push the code in the GitHub automatic run the actions
+```
+
+### Postman `API Testing`
+```bash
+https://api.postman.com/collections/22653708-df253a8d-6b26-4e83-9673-793d1d6c04d5?access_key=PMAT-01HWT700T6H22BASWVF2E3HK9R
 ```

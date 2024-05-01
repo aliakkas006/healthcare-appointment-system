@@ -14,8 +14,8 @@ class AppointmentService {
       const appointment = await prisma.appointment.create({
         data: appointmentData,
       });
-
-      sendToQueue('send-email', JSON.stringify(appointment));
+      
+      await sendToQueue('send-email', JSON.stringify(appointment));
 
       await redis.del('appointments');
 

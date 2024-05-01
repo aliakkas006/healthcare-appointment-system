@@ -2,7 +2,6 @@ import express from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
 import routes from '@/routes';
-import '@/receiver';
 
 const app = express();
 

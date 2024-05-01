@@ -21,7 +21,7 @@ const limiter = rateLimit({
   },
 });
 
-app.use('/api', limiter);
+app.use('/api/v1', limiter);
 
 app.use([express.json(), cors(), morgan('dev')]);
 
