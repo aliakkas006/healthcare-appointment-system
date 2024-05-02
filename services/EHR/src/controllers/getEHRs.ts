@@ -1,5 +1,5 @@
-import ehrService from '@/lib/EHRService';
 import { Request, Response, NextFunction } from 'express';
+import ehrService from '@/lib/EHRService';
 
 const getEHRs = async (_req: Request, res: Response, next: NextFunction) => {
   try {

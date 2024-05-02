@@ -28,11 +28,13 @@ class RegistrationService {
   /**
    * Create an auth user.
    */
-  public async createUser(userData) {
+  public async createUser(userData: any) {
+    const hashedPassword = await this.generateHash(userData.password);
+
     const user = await prisma.user.create({
       data: {
         ...userData,
-        password: await this.generateHash(userData.password),
+        password: hashedPassword,
       },
       select: {
         id: true,

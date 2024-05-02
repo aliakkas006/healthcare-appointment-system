@@ -23,7 +23,7 @@ const register = async (req: Request, res: Response, next: NextFunction) => {
     const user = await registrationService.createUser(parsedBody.data);
     await registrationService.createUserProfile(user.id, name, email);
 
-    // Generate verification code
+    // Generate verification code and save it to the database
     const code = emailService.generateVerificationCode();
     await emailService.createVerificationCode(user.id, code);
 

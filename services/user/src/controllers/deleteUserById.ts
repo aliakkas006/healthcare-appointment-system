@@ -1,5 +1,5 @@
-import userService from '@/lib/UserService';
 import { Request, Response, NextFunction } from 'express';
+import userService from '@/lib/UserService';
 
 const deleteUserById = async (
   req: Request,

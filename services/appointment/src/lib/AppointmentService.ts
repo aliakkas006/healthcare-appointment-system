@@ -14,7 +14,7 @@ class AppointmentService {
       const appointment = await prisma.appointment.create({
         data: appointmentData,
       });
-      
+
       await sendToQueue('send-email', JSON.stringify(appointment));
 
       await redis.del('appointments');
@@ -122,21 +122,48 @@ class AppointmentService {
 
   /**
    * Update an appointment
+   * Invalidate cache for the updated appointment and all appointments
+   * @param appointmentId - Appointment ID
+   * @param appointmentData - Data to update the appointment
+   * @returns Updated appointment data
    */
   public async updateAppointment(appointmentId: string, appointmentData: any) {
-    return prisma.appointment.update({
-      where: { id: appointmentId },
-      data: appointmentData,
-    });
+    try {
+      const appointment = await prisma.appointment.update({
+        where: { id: appointmentId },
+        data: appointmentData,
+      });
+
+      await redis.del(`appointment:${appointmentId}`);
+      await redis.del('appointments');
+
+      return appointment;
+    } catch (err) {
+      console.error('Error updating appointment:', err);
+      throw err;
+    }
   }
 
   /**
    * Delete an appointment
+   * Invalidate cache for the deleted appointment data and all appointments
+   * @param appointmentId - Appointment ID
+   * @returns Deleted appointment data
    */
   public async deleteAppointment(appointmentId: string) {
-    return prisma.appointment.delete({
-      where: { id: appointmentId },
-    });
+    try {
+      const appointment = await prisma.appointment.delete({
+        where: { id: appointmentId },
+      });
+
+      await redis.del(`appointment:${appointmentId}`);
+      await redis.del('appointments');
+
+      return appointment;
+    } catch (err) {
+      console.error('Error deleting appointment:', err);
+      throw err;
+    }
   }
 
   /**

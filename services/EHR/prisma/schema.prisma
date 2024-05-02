@@ -16,15 +16,17 @@ enum Gender {
 }
 
 model EHR {
-  id                String     @id @default(cuid())
+  id                String             @id @default(cuid())
   patientId         String
-  patientEmail      String
+  patientEmail      String             @unique
   medicalHistories  String[]
   allergies         String[]
   medications       Medication[]
   diagnosticReports DiagnosticReport[]
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
 
-  patient           Patient    @relation(fields: [patientId], references: [id])
+  patient           Patient             @relation(fields: [patientId], references: [id])
 }
 
 model Patient {

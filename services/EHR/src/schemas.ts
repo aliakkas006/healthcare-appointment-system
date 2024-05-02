@@ -1,17 +1,15 @@
 import { z } from 'zod';
 
-const Medication = z.object({
-  id: z.string(),
+export const MedicationCreateSchema = z.object({
   name: z.string(),
   dosage: z.string(),
-  start_date: z.date(),
-  end_date: z.date(),
+  start_date: z.string(),
+  end_date: z.string(),
 });
 
-const DiagnosticReport = z.object({
-  id: z.string(),
+export const DiagnosticReportCreateSchema = z.object({
   title: z.string(),
-  date: z.date(),
+  date: z.string(),
   findings: z.string(),
 });
 
@@ -20,10 +18,16 @@ export const EHRCreateSchema = z.object({
   patientEmail: z.string().email(),
   medicalHistories: z.array(z.string()),
   allergies: z.array(z.string()),
-  medications: z.array(Medication),
-  diagnosticReports: z.array(DiagnosticReport),
 });
 
 export const EHRUpdateSchema = EHRCreateSchema.omit({
   patientId: true,
 }).partial();
+
+export const PatientCreateSchema = z.object({
+  userId: z.string(),
+  patientName: z.string(),
+  dateOfBirth: z.string(),
+  medicalHistory: z.string().optional(),
+  insuranceInformation: z.string().optional(),
+});

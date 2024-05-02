@@ -42,6 +42,15 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/appointment:latest
 
+      - name: Build and push EHR service
+        uses: docker/build-push-action@v5
+        with:
+          context: ./services/EHR
+          file: ./services/EHR/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/EHR:latest
+
       - name: Build and push user service
         uses: docker/build-push-action@v5
         with:

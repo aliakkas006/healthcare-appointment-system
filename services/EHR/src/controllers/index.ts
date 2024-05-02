@@ -1,2 +1,11 @@
 export { default as createEHR } from './createEHR';
 export { default as getEHRs } from './getEHRs';
+export { default as getEHRById } from './getEHRById';
+export { default as getEHRByPatientId } from './getEHRByPatientId';
+export { default as updateEHRById } from './updateEHRById';
+export { default as deleteEHRById } from './deleteEHRById';
+export { default as createPatient } from './createPatient';
+export { default as createMedication } from './createMedication';
+export { default as createDiagnosticReport } from './createDiagnosticReport';
+export { default as getMedications } from './getMedications';
+export { default as getDiagnosticReports } from './getDiagnosticReports';
