@@ -4,14 +4,6 @@ import axios from 'axios';
 
 class EmailService {
   /**
-   * Generates a random 5-digit verification code.
-   */
-  public generateVerificationCode() {
-    const randomNum = Math.floor(10000 + Math.random() * 90000);
-    return randomNum.toString();
-  }
-
-  /**
    * Create verification code and save it to the database
    */
   public async createVerificationCode(userId: string, code: string) {

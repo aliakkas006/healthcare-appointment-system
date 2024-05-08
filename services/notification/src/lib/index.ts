@@ -67,6 +67,7 @@ class NotificationService {
           `Processing appointment confirmation for ${notification.recipient}`
         );
         // TODO: Logic to send confirmation email
+        // TODO: Logic to send confirmation sms
 
         break;
       case 'REMINDER':
@@ -74,12 +75,14 @@ class NotificationService {
           `Processing appointment reminder for ${notification.recipient}`
         );
         // TODO: Logic to send reminder email
+        // TODO: Logic to send reminder sms
         break;
       case 'CANCELLATION':
         console.log(
           `Processing appointment cancellation for ${notification.recipient}`
         );
         // TODO: Logic to send cancellation email
+        // TODO: Logic to send cancellation sms
         break;
       default:
         console.log(`Unknown notification type: ${notification.type}`);

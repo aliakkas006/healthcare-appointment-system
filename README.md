@@ -1,3 +1,5 @@
+[![TypeScript Node](logo.svg?sanitize=true)](https://typestrong.org/ts-node)
+
 # Healthcare Appointment Scheduling System
 
 ## About
@@ -122,10 +124,16 @@ Healthcare-Appointment-Scheduling-System/
 
 follow .env.example file for setup environment variables
 
-### Run the `Microservices Dependency`
+### Run the `Microservices and their Dependencies`
 
 ```bash
 docker-compose up
+```
+
+### Run the `Kong API Gateway` and `Keycloak`
+
+```bash
+docker-compose -f kong-docker-compose.yml up
 ```
 
 ### Run the `Tests`

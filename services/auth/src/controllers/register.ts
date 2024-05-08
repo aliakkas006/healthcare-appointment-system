@@ -2,6 +2,7 @@ import { Response, Request, NextFunction } from 'express';
 import { UserCreateSchema } from '@/schemas';
 import registrationService from '@/lib/RegistrationService';
 import emailService from '@/lib/EmailService';
+import generateVerificationCode from '@/utils/generateVerificationCode';
 
 const register = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -24,7 +25,7 @@ const register = async (req: Request, res: Response, next: NextFunction) => {
     await registrationService.createUserProfile(user.id, name, email);
 
     // Generate verification code and save it to the database
-    const code = emailService.generateVerificationCode();
+    const code = generateVerificationCode();
     await emailService.createVerificationCode(user.id, code);
 
     // Send verification email

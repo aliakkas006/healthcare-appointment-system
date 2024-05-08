@@ -1,0 +1,32 @@
+_format_version: '3.0'
+_transform: true
+
+services:
+  # Appointments service
+  - name: appointment
+    url: http://appointment:8080
+    routes:
+      - name: appointment-routes
+        paths:
+          - /api/v1/appointments
+        methods:
+          - GET
+          - POST
+        strip_path: true
+    plugins:
+      - name: rate-limiting
+        service: appointment
+        config:
+          second: 10 # 10 requests per second
+          minute: 100
+          hour: 1000
+          day: 10000
+          policy: local
+          fault_tolerant: true
+          hide_client_headers: false
+          redis_ssl: false
+          redis_ssl_verify: false
+      - name: request-size-limiting
+        service: appointment
+        config:
+          allowed_payload_size: 10240 # 10KB

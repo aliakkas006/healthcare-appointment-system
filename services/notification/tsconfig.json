@@ -16,7 +16,7 @@
     "allowSyntheticDefaultImports": true,
     "typeRoots": ["./src/types", "./node_modules/@types"],
     "sourceMap": true,
-    "types": ["node", "express"],
+    "types": ["node", "express", "jest"],
     "noImplicitAny": false,
     "baseUrl": "./src",
     "paths": {
