@@ -1,27 +1,6 @@
 version: '3.8'
 
 services:
-  # Custom API Gateway --------------------------------
-  # api-gateway:
-  #   build:
-  #     context: ./api-gateway
-  #     dockerfile: Dockerfile
-  #   ports:
-  #     - '8081:8081'
-  #   environment:
-  #     - PORT=8081
-  #     - API_GATEWAY_URL='http://api-gateway:8081'
-  #   volumes:
-  #     - ./api-gateway:/app
-  #   networks:
-  #     - healthcare-appointment-system-network
-  #   depends_on:
-  #     - auth
-  #     - user
-  #     - email
-  #     - redis-stack
-  #     - rabbitmq
-
   # Auth Service --------------------------------
   auth:
     build:
@@ -72,13 +51,13 @@ services:
       - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
       - REDIS_HOST=redis-stack
       - REDIS_PORT=6379
+      - ELASTICSEARCH_URL=http://elasticsearch:9200
     volumes:
       - ./services/appointment:/app
     networks:
       - healthcare-appointment-system-network
     depends_on:
       - postgres
-      - email
       - rabbitmq
       - redis-stack
 
@@ -103,23 +82,23 @@ services:
       - rabbitmq
       - redis-stack
 
-  # Notification Service -------------------------------
-  notification:
-    build:
-      context: ./services/notification
-      dockerfile: Dockerfile
-    ports:
-      - '4005:8080'
-    environment:
-      - DATABASE_URL=postgresql://admin:password@postgres:5432/notification_db?schema=public
-      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
-    volumes:
-      - ./services/notification:/app
-    networks:
-      - healthcare-appointment-system-network
-    depends_on:
-      - postgres
-      - rabbitmq
+  # # Notification Service -------------------------------
+  # notification:
+  #   build:
+  #     context: ./services/notification
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - '4005:8080'
+  #   environment:
+  #     - DATABASE_URL=postgresql://admin:password@postgres:5432/notification_db?schema=public
+  #     - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
+  #   volumes:
+  #     - ./services/notification:/app
+  #   networks:
+  #     - healthcare-appointment-system-network
+  #   depends_on:
+  #     - postgres
+  #     - rabbitmq
 
   # Email Service -------------------------------
   email:
@@ -148,7 +127,7 @@ services:
       POSTGRES_PASSWORD: password
       POSTGRES_DB: postgres
     ports:
-      - '5433:5432' 
+      - '5433:5432'
     networks:
       - healthcare-appointment-system-network
     volumes:
@@ -210,6 +189,53 @@ services:
     volumes:
       - mailhog-data:/var/lib/mailhog
 
+  # Elasticsearch -------------------------------
+  elasticsearch:
+    image: elasticsearch:7.9.2
+    environment:
+      - discovery.type=single-node
+      - 'ES_JAVA_OPTS=-Xms1024m -Xmx1024m' # 1GB of memory allocated to JVM  heap size
+    ports:
+      - '9200:9200' # HTTP port
+      - '9300:9300' # TCP port
+    networks:
+      - healthcare-appointment-system-network
+    volumes:
+      - elasticsearch-data:/var/lib/elasticsearch
+
+  # Kibana -----------------------------------
+  kibana:
+    image: kibana:7.9.2
+    environment:
+      - ELASTICSEARCH_URL=http://elasticsearch:9200
+    ports:
+      - '5601:5601' # HTTP port
+    networks:
+      - healthcare-appointment-system-network
+    depends_on:
+      - elasticsearch
+
+  # Custom API Gateway --------------------------------
+  # api-gateway:
+  #   build:
+  #     context: ./api-gateway
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - '8081:8081'
+  #   environment:
+  #     - PORT=8081
+  #     - API_GATEWAY_URL='http://api-gateway:8081'
+  #   volumes:
+  #     - ./api-gateway:/app
+  #   networks:
+  #     - healthcare-appointment-system-network
+  #   depends_on:
+  #     - auth
+  #     - user
+  #     - email
+  #     - redis-stack
+  #     - rabbitmq
+
   # ------------------------------------------
 
 networks:
@@ -221,3 +247,4 @@ volumes:
   redis-data:
   rabbitmq-data:
   mailhog-data:
+  elasticsearch-data:

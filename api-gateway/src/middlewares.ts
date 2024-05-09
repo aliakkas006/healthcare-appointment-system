@@ -9,7 +9,7 @@ const auth = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const token = req.headers['authorization']?.split(' ')[1];
     const { data } = await axios.post(
-      'http://localhost:4003/auth/verify-token',
+      'http://auth:4003/auth/verify-token',
       {
         accessToken: token,
         headers: {

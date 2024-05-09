@@ -1,4 +1,5 @@
-import { defaultSender } from '@/config';
+import { defaultSender } from '@/config/config_url';
+import logger from '@/config/logger';
 import emailService from '@/libs/EmailService';
 import { EmailCreateSchema } from '@/schemas';
 import { Request, Response, NextFunction } from 'express';
@@ -24,9 +25,9 @@ const sendEmail = async (req: Request, res: Response, next: NextFunction) => {
 
     // Send the email
     const { rejected } = await emailService.sendEmail(emailOptions);
-    
+
     if (rejected.length) {
-      console.log('Email rejected', rejected);
+      logger.info('Email rejected', rejected);
       return res.status(500).json({ message: 'Failed' });
     }
 

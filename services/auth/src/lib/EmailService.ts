@@ -1,5 +1,6 @@
-import { EMAIL_SERVICE } from '@/config';
-import prisma from '@/prisma';
+import { EMAIL_SERVICE } from '@/config/config_url';
+import logger from '@/config/logger';
+import prisma from '@/config/prisma';
 import axios from 'axios';
 
 class EmailService {
@@ -20,7 +21,7 @@ class EmailService {
    * Send the verification email.
    */
   public async sendVerificationEmail(recipient: string, code: string) {
-    console.log('Sending verification email to:', recipient);
+    logger.info('Sending verification email to:', recipient);
 
     await axios.post(`${EMAIL_SERVICE}/emails/send`, {
       recipient,

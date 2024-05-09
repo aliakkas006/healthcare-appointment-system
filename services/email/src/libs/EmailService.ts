@@ -1,6 +1,7 @@
-import prisma from '@/prisma';
-import { defaultSender, transporter } from '@/config';
+import prisma from '@/config/prisma';
+import { defaultSender, transporter } from '@/config/config_url';
 import { EmailData, EmailOptions } from '@/types';
+import logger from '@/config/logger';
 
 class EmailService {
   /**
@@ -66,9 +67,9 @@ class EmailService {
         source: 'appointment',
       });
 
-      console.log(`Email sent to ${patientEmail}`);
+      logger.info(`Email sent to ${patientEmail}`);
     } catch (err) {
-      console.error('Error sending email:', err);
+      logger.error('Error sending email:', err);
       throw err;
     }
   }
@@ -106,9 +107,9 @@ class EmailService {
         source: 'EHR',
       });
 
-      console.log(`Email sent to ${patientEmail}`);
+      logger.info(`Email sent to ${patientEmail}`);
     } catch (err) {
-      console.error('Error sending email:', err);
+      logger.error('Error sending email:', err);
       throw err;
     }
   }

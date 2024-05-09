@@ -1,4 +1,4 @@
-import prisma from '@/prisma';
+import prisma from '@/config/prisma';
 
 class PatientService {
   /**
@@ -35,7 +35,6 @@ class PatientService {
     return prisma.patient.findUnique({
       where: { id: patientId },
     });
-
   }
 }
 

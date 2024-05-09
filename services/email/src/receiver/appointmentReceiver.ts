@@ -1,6 +1,7 @@
 import amqp from 'amqplib';
-import { RABBITMQ_URL } from '@/config';
+import { RABBITMQ_URL } from '@/config/config_url';
 import emailService from '@/libs/EmailService';
+import logger from '@/config/logger';
 
 const appointmentReceiver = async (
   queue: string,
@@ -26,7 +27,7 @@ const appointmentReceiver = async (
       { noAck: true }
     );
   } catch (err) {
-    console.error('Error occurred while consuming messages from queue:', err);
+    logger.error('Error occurred while consuming messages from queue:', err);
   }
 };
 
@@ -35,6 +36,6 @@ appointmentReceiver('send-email', async (msg) => {
     const parsedBody = JSON.parse(msg);
     await emailService.processEmailAppointment(parsedBody);
   } catch (error) {
-    console.error('Error processing message:', error);
+    logger.error('Error processing message:', error);
   }
 });

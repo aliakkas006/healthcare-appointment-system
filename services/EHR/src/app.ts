@@ -1,11 +1,21 @@
-import express from 'express';
+import express, { NextFunction, Request, Response } from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
 import routes from '@/routes';
+import logger from '@/config/logger';
+import setCorrelationId from '@/config/setCorrelationId';
+import expressWinstonLogger from '@/config/expressWinstonLogger';
 
 const app = express();
 
-app.use([express.json(), cors(), morgan('dev')]);
+app.use([
+  express.json(),
+  express.urlencoded({ extended: true }),
+  setCorrelationId,
+  expressWinstonLogger('http'),
+  cors(),
+  morgan('dev'),
+]);
 
 // Health check
 app.get('/health', (_req, res) => {
@@ -21,9 +31,16 @@ app.use((_req, res) => {
 });
 
 // Global Error handler
-app.use((err, _req, res, _next) => {
-  console.error(err.stack);
-  res.status(500).json({ error: 'Internal Server Error' });
+app.use((err: any, req: Request, res: Response, _next: NextFunction) => {
+  const errObj = {
+    status: err?.status || 500,
+    message: err?.message || 'Something went wrong!',
+    errors: err?.errors || [],
+    correlationId: req.headers['x-correlation-id'],
+  };
+
+  logger.error(JSON.stringify(errObj));
+  res.status(errObj.status).json(errObj);
 });
 
 export default app;

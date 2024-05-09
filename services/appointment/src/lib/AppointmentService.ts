@@ -1,6 +1,7 @@
-import prisma from '@/prisma';
-import sendToQueue from '@/queue';
-import redis from '@/redis';
+import prisma from '@/config/prisma';
+import sendToQueue from '@/utils/queue';
+import redis from '@/config/redis';
+import logger from '@/config/logger';
 
 class AppointmentService {
   /**
@@ -16,12 +17,13 @@ class AppointmentService {
       });
 
       await sendToQueue('send-email', JSON.stringify(appointment));
-
       await redis.del('appointments');
+      
+      logger.info('Appointment created successfully:', appointment);
 
       return appointment;
     } catch (err) {
-      console.error('Error creating appointment:', err);
+      logger.error('Error creating appointment:', err);
       throw err;
     }
   }
@@ -46,7 +48,7 @@ class AppointmentService {
 
       return appointments;
     } catch (err) {
-      console.error('Error fetching appointments:', err);
+      logger.error('Error fetching appointments:', err);
       throw err;
     }
   }
@@ -76,7 +78,7 @@ class AppointmentService {
 
       return appointments;
     } catch (err) {
-      console.error('Error fetching appointments:', err);
+      logger.error('Error fetching appointments:', err);
       throw err;
     }
   }
@@ -115,7 +117,7 @@ class AppointmentService {
 
       return appointment;
     } catch (err) {
-      console.error('Error fetching appointment:', err);
+      logger.error('Error fetching appointment:', err);
       throw err;
     }
   }
@@ -139,7 +141,7 @@ class AppointmentService {
 
       return appointment;
     } catch (err) {
-      console.error('Error updating appointment:', err);
+      logger.error('Error updating appointment:', err);
       throw err;
     }
   }
@@ -161,7 +163,7 @@ class AppointmentService {
 
       return appointment;
     } catch (err) {
-      console.error('Error deleting appointment:', err);
+      logger.error('Error deleting appointment:', err);
       throw err;
     }
   }

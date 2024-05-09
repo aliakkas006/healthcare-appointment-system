@@ -1,5 +1,6 @@
-import { EMAIL_SERVICE, USER_SERVICE } from '@/config';
-import prisma from '@/prisma';
+import { EMAIL_SERVICE, USER_SERVICE } from '@/config/config_url';
+import logger from '@/config/logger';
+import prisma from '@/config/prisma';
 import axios from 'axios';
 import bcrypt from 'bcryptjs';
 
@@ -58,7 +59,7 @@ class RegistrationService {
       email,
     });
 
-    console.log('USER:', user.data);
+    logger.info('USER:', user.data);
     return user;
   }
 }

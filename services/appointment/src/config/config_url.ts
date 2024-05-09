@@ -6,3 +6,6 @@ export const REDIS_PORT = process.env.REDIS_PORT
   : 6379;
 
 export const REDIS_HOST = process.env.REDIS_HOST || 'redis-stack';
+
+export const ELASTICSEARCH_URL =
+  process.env.ELASTICSEARCH_URL || 'http://elasticsearch:9200';

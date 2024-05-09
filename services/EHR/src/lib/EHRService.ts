@@ -1,6 +1,7 @@
-import prisma from '@/prisma';
-import sendToQueue from '@/queue';
-import redis from '@/redis';
+import prisma from '@/config/prisma';
+import sendToQueue from '@/utils/queue';
+import redis from '@/config/redis';
+import logger from '@/config/logger';
 
 class EHRService {
   /**
@@ -60,13 +61,14 @@ class EHRService {
         },
       });
 
-      await sendToQueue('send-email', JSON.stringify(ehr));
+      logger.info('EHR Created Successfully: ', ehr);
 
+      await sendToQueue('send-email', JSON.stringify(ehr));
       await redis.del('EHRs');
 
       return ehr;
     } catch (err) {
-      console.error('Error creating EHR:', err);
+      logger.error('Error creating EHR:', err);
       throw err;
     }
   }
@@ -92,7 +94,7 @@ class EHRService {
 
       return EHRs;
     } catch (err) {
-      console.error('Error fetching EHRs:', err);
+      logger.error('Error fetching EHRs:', err);
       throw err;
     }
   }
@@ -122,7 +124,7 @@ class EHRService {
 
       return EHR;
     } catch (err) {
-      console.error('Error fetching EHRs:', err);
+      logger.error('Error fetching EHRs:', err);
       throw err;
     }
   }
@@ -157,7 +159,7 @@ class EHRService {
 
       return EHR;
     } catch (err) {
-      console.error('Error fetching EHR:', err);
+      logger.error('Error fetching EHR:', err);
       throw err;
     }
   }
@@ -183,7 +185,7 @@ class EHRService {
 
       return ehr;
     } catch (err) {
-      console.error('Error updating EHR:', err);
+      logger.error('Error updating EHR:', err);
       throw err;
     }
   }
@@ -207,7 +209,7 @@ class EHRService {
 
       return ehr;
     } catch (err) {
-      console.error('Error deleting EHR:', err);
+      logger.error('Error deleting EHR:', err);
       throw err;
     }
   }
@@ -217,7 +219,7 @@ class EHRService {
    * @returns Medications data
    */
   public async getMedications() {
-    console.log('Fetching Medications from the database');
+    logger.info('Fetching Medications from the database');
     return prisma.medication.findMany();
   }
 

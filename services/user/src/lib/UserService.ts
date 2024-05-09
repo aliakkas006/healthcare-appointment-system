@@ -1,4 +1,4 @@
-import prisma from '@/prisma';
+import prisma from '@/config/prisma';
 import { User } from '@prisma/client';
 
 class UserService {
