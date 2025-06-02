@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 import { EmailVerificationSchema } from '@/schemas';
-import emailService from '@/lib/EmailService';
+import { IAuthEmailService } from '@/lib/services/interfaces/IAuthEmailService';
 
-const verifyEmail = async (req: Request, res: Response, next: NextFunction) => {
+export default (authEmailService: IAuthEmailService) => async (req: Request, res: Response, next: NextFunction) => {
   try {
     // Validate the request body
     const parsedBody = EmailVerificationSchema.safeParse(req.body);
@@ -13,20 +13,20 @@ const verifyEmail = async (req: Request, res: Response, next: NextFunction) => {
 
     const { email, code } = parsedBody.data;
 
-    // Verify the user email
-    const { user, verificationCode } = await emailService.verifyUserEmail(
+    // Verify the user email (this method now encapsulates finding user and code, and checking expiration)
+    const { user, verificationCode } = await authEmailService.verifyUserEmail(
       email,
       code
     );
 
     // Update user status to verified
-    await emailService.updateUserStatus(user.id);
+    await authEmailService.updateUserStatus(user.id);
 
     // Update verification code status to used
-    await emailService.updateVerificationCodeStatus(verificationCode.id);
+    await authEmailService.updateVerificationCodeStatus(verificationCode.id);
 
     // Send verification success email
-    await emailService.sendVerificationSuccessEmail(user.email);
+    await authEmailService.sendVerificationSuccessEmail(user.email);
 
     // Return success response
     return res.status(200).json({ message: 'Email verified successfully!' });
@@ -34,5 +34,3 @@ const verifyEmail = async (req: Request, res: Response, next: NextFunction) => {
     next(error);
   }
 };
-
-export default verifyEmail;

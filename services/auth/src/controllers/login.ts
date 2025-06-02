@@ -1,11 +1,10 @@
 import { Response, Request, NextFunction } from 'express';
 import { UserLoginSchema } from '@/schemas';
-import loginService from '@/lib/LoginService';
+import { ILoginService } from '@/lib/services/interfaces/ILoginService';
 
-const login = async (req: Request, res: Response, next: NextFunction) => {
+export default (loginService: ILoginService) => async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const ipAddress =
-      (req.headers['x-forwarded-for'] as string) || req.ip || '';
+    const ipAddress = (req.headers['x-forwarded-for'] as string) || req.ip || '';
     const userAgent = req.headers['user-agent'] || '';
 
     // Validate the request body
@@ -17,10 +16,10 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
     const { email, password } = parsedBody.data;
 
     // Authenticate user
-    const user = await loginService.login(email, password);
+    const user = await loginService.login(email, password); // Use injected service
 
     // Generate access token
-    const accessToken = loginService.generateAccessToken(
+    const accessToken = loginService.generateAccessToken( // Use injected service
       user.id,
       user.email,
       user.name,
@@ -28,7 +27,7 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
     );
 
     // Create login history
-    await loginService.createLoginHistory({
+    await loginService.createLoginHistory({ // Use injected service
       userId: user.id,
       userAgent,
       ipAddress,
@@ -39,8 +38,10 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
       accessToken,
     });
   } catch (error) {
+    // If login fails and createLoginHistory is called, it might log a failed attempt.
+    // This depends on where the error is thrown in loginService.login
+    // For now, assuming error in login() prevents history creation or is handled by caller.
+    // Consider adding specific error handling to record 'FAILED' attempts if not done in service.
     next(error);
   }
 };
-
-export default login;
