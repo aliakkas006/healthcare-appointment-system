@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
-import userService from '@/lib/UserService';
+import { IUserService } from '@/lib/IUserService';
 
-const deleteUserById = async (
+export default (userService: IUserService) => async (
   req: Request,
   res: Response,
   next: NextFunction
@@ -17,5 +17,3 @@ const deleteUserById = async (
     next(err);
   }
 };
-
-export default deleteUserById;

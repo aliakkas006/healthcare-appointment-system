@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 import { UserCreateSchema } from '@/schemas';
-import userService from '@/lib/UserService';
+import { IUserService } from '@/lib/IUserService';
 
-const createUser = async (req: Request, res: Response, next: NextFunction) => {
+export default (userService: IUserService) => async (req: Request, res: Response, next: NextFunction) => {
   try {
     // Validate the request body
     const parsedBody = UserCreateSchema.safeParse(req.body);
@@ -11,6 +11,7 @@ const createUser = async (req: Request, res: Response, next: NextFunction) => {
     }
 
     const { authUserId } = parsedBody.data;
+    // Use the injected userService instance
     const existingUser = await userService.checkExistingUser(authUserId);
 
     if (existingUser) {
@@ -24,5 +25,3 @@ const createUser = async (req: Request, res: Response, next: NextFunction) => {
     next(error);
   }
 };
-
-export default createUser;
