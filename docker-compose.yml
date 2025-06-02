@@ -83,22 +83,22 @@ services:
       - redis-stack
 
   # # Notification Service -------------------------------
-  # notification:
-  #   build:
-  #     context: ./services/notification
-  #     dockerfile: Dockerfile
-  #   ports:
-  #     - '4005:8080'
-  #   environment:
-  #     - DATABASE_URL=postgresql://admin:password@postgres:5432/notification_db?schema=public
-  #     - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
-  #   volumes:
-  #     - ./services/notification:/app
-  #   networks:
-  #     - healthcare-appointment-system-network
-  #   depends_on:
-  #     - postgres
-  #     - rabbitmq
+  notification:
+    build:
+      context: ./services/notification
+      dockerfile: Dockerfile
+    ports:
+      - '4005:8080'
+    environment:
+      - DATABASE_URL=postgresql://admin:password@postgres:5432/notification_db?schema=public
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
+    volumes:
+      - ./services/notification:/app
+    networks:
+      - healthcare-appointment-system-network
+    depends_on:
+      - postgres
+      - rabbitmq
 
   # Email Service -------------------------------
   email:
