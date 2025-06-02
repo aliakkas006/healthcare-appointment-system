@@ -1,14 +1,12 @@
 import { Request, Response, NextFunction } from 'express';
-import emailService from '@/libs/EmailService';
+import { IEmailService } from '@/lib/services/interfaces/IEmailService';
 
-const getEmails = async (_req: Request, res: Response, next: NextFunction) => {
+export default (emailService: IEmailService) => async (_req: Request, res: Response, next: NextFunction) => {
   try {
-    const emails = await emailService.getEmails();
-
+    const emails = await emailService.listSentEmails();
     res.status(200).json(emails);
   } catch (error) {
+    // Log controller-specific errors if any, or just pass to global error handler
     next(error);
   }
 };
-
-export default getEmails;

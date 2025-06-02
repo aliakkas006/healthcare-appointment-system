@@ -1,10 +1,9 @@
-import { defaultSender } from '@/config/config_url';
-import logger from '@/config/logger';
-import emailService from '@/libs/EmailService';
+import logger from '@/config/logger'; // Keep logger if used for controller-specific logging
+import { IEmailService } from '@/lib/services/interfaces/IEmailService';
 import { EmailCreateSchema } from '@/schemas';
 import { Request, Response, NextFunction } from 'express';
 
-const sendEmail = async (req: Request, res: Response, next: NextFunction) => {
+export default (emailService: IEmailService) => async (req: Request, res: Response, next: NextFunction) => {
   try {
     // Validate the request body
     const parsedBody = EmailCreateSchema.safeParse(req.body);
@@ -13,37 +12,18 @@ const sendEmail = async (req: Request, res: Response, next: NextFunction) => {
       return res.status(400).json({ errors: parsedBody.error.errors });
     }
 
-    const { sender, recipient, subject, body, source } = parsedBody.data;
+    // The parsedBody.data should conform to EmailData type expected by sendGenericEmail
+    // EmailData includes: sender (optional), recipient, subject, body, source.
+    // The EmailCreateSchema should align with this.
+    // The sendGenericEmail method in MainEmailService will handle default sender logic.
+    await emailService.sendGenericEmail(parsedBody.data);
 
-    // Define the email options
-    const emailOptions = {
-      from: sender || defaultSender,
-      to: recipient,
-      subject,
-      text: body,
-    };
-
-    // Send the email
-    const { rejected } = await emailService.sendEmail(emailOptions);
-
-    if (rejected.length) {
-      logger.info('Email rejected', rejected);
-      return res.status(500).json({ message: 'Failed' });
-    }
-
-    // Save the email to the database
-    await emailService.saveEmailToDB({
-      sender,
-      recipient,
-      subject,
-      body,
-      source,
-    });
-
-    return res.status(200).json({ message: 'Email Sent successfully' });
+    return res.status(200).json({ message: 'Email processed successfully' });
   } catch (err) {
+    // sendGenericEmail might throw errors (e.g., from transport or db write if not caught and re-thrown)
+    // Or it might handle them internally and not throw.
+    // Assuming errors that reach here are critical failures.
+    logger.error('Error in sendEmail controller:', err); // Controller-level logging
     next(err);
   }
 };
-
-export default sendEmail;
