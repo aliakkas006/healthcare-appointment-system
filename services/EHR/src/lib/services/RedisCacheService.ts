@@ -1,12 +1,9 @@
-import { ICacheService } from "./interfaces/ICacheService";
-import { Redis } from "ioredis"; // Type for the ioredis client
-// The actual redis client instance will be injected via the constructor.
-// No direct import of the instance from '@/config/redis' here in the class file itself,
-// but the main service factory/router will do that.
+import { ICacheService } from './interfaces/ICacheService';
+import { Redis } from 'ioredis';
 
 export class RedisCacheService implements ICacheService {
   private readonly redisClient: Redis;
-  private readonly defaultTTL: number = 3600; // Default TTL of 1 hour, example
+  private readonly defaultTTL: number = 3600; // Default TTL of 1 hour
 
   constructor(redisClient: Redis) {
     this.redisClient = redisClient;
@@ -37,7 +34,6 @@ export class RedisCacheService implements ICacheService {
       }
     } catch (error) {
       console.error(`Error setting cache for key ${key} in Redis:`, error);
-      // Optionally re-throw
     }
   }
 
@@ -46,7 +42,6 @@ export class RedisCacheService implements ICacheService {
       await this.redisClient.del(key);
     } catch (error) {
       console.error(`Error deleting cache for key ${key} from Redis:`, error);
-      // Optionally re-throw
     }
   }
 
@@ -69,8 +64,10 @@ export class RedisCacheService implements ICacheService {
         }
       } while (cursor !== '0');
     } catch (error) {
-      console.error(`Error deleting cache for prefix ${prefix} from Redis:`, error);
-      // Optionally re-throw
+      console.error(
+        `Error deleting cache for prefix ${prefix} from Redis:`,
+        error
+      );
     }
   }
 }

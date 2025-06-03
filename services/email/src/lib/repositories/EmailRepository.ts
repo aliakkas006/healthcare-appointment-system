@@ -1,7 +1,7 @@
-import { IEmailRepository } from "./interfaces/IEmailRepository";
-import { Email, PrismaClient, Prisma } from "@prisma/client";
-import { EmailData } from "@/types"; // Resolves to services/email/src/types
-import { defaultSender } from "@/config/config_url"; // Resolves to services/email/src/config/config_url
+import { IEmailRepository } from './interfaces/IEmailRepository';
+import { Email, PrismaClient, Prisma } from '@prisma/client';
+import { EmailData } from '@/types';
+import { defaultSender } from '@/config/config_url';
 
 export class EmailRepository implements IEmailRepository {
   private readonly prisma: PrismaClient;

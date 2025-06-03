@@ -1,7 +1,6 @@
-import { IUserRepository } from "./IUserRepository";
-import { User, PrismaClient } from "@prisma/client";
-import prisma from "@/config/prisma"; // Assuming this is the default prisma client instance
-
+import { IUserRepository } from './IUserRepository';
+import { User, PrismaClient } from '@prisma/client';
+import prisma from '@/config/prisma';
 export class UserRepository implements IUserRepository {
   private readonly prisma: PrismaClient;
 

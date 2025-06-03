@@ -1,4 +1,4 @@
-import { Patient, Prisma } from "@prisma/client";
+import { Patient, Prisma } from '@prisma/client';
 
 export interface IPatientRepository {
   findByUserId(userId: string): Promise<Patient | null>;

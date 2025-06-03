@@ -26,10 +26,16 @@ const loginHistoryRepository = new LoginHistoryRepository(prisma);
 const verificationCodeRepository = new VerificationCodeRepository(prisma);
 
 // Instantiate Services (Injecting Repositories)
-const loginService = new LoginService(authUserRepository, loginHistoryRepository);
+const loginService = new LoginService(
+  authUserRepository,
+  loginHistoryRepository
+);
 const registrationService = new RegistrationService(authUserRepository);
 const tokenService = new TokenService(authUserRepository);
-const authEmailService = new AuthEmailService(authUserRepository, verificationCodeRepository);
+const authEmailService = new AuthEmailService(
+  authUserRepository,
+  verificationCodeRepository
+);
 
 // Update Route Definitions
 router.post('/auth/register', register(registrationService, authEmailService));

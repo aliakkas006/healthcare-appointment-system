@@ -1,4 +1,4 @@
-import { User } from "@prisma/client";
+import { User } from '@prisma/client';
 
 export interface IUserService {
   checkExistingUser(authUserId: string): Promise<User | null>;

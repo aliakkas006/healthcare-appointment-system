@@ -22,8 +22,6 @@ class LoginService implements ILoginService {
    * Create login history
    */
   public async createLoginHistory(info: LoginHistory): Promise<void> {
-    // The interface ILoginHistoryRepository.create returns Promise<LoginHistory>
-    // If void is strictly needed, we don't return its result.
     await this.loginHistoryRepository.create(info);
   }
 

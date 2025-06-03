@@ -1,5 +1,5 @@
-import { IEHRPatientRepository } from "./interfaces/IEHRPatientRepository";
-import { Patient, PrismaClient, Prisma } from "@prisma/client";
+import { IEHRPatientRepository } from './interfaces/IEHRPatientRepository';
+import { Patient, PrismaClient, Prisma } from '@prisma/client';
 
 export class EHRPatientRepository implements IEHRPatientRepository {
   private readonly prisma: PrismaClient;

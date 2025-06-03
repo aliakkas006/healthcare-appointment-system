@@ -1,17 +1,20 @@
-import { eHR, Prisma, Medication, DiagnosticReport } from "@prisma/client";
+import { EHR, Prisma, Medication, DiagnosticReport } from '@prisma/client';
 
 // Helper type for EHR with its relations, can be moved to a central types file if needed.
-export type EHRWithRelations = eHR & {
+export type EHRWithRelations = EHR & {
   medications: Medication[];
   diagnosticReports: DiagnosticReport[];
 };
 
 export interface IEHRService {
-  checkExistingEHR(patientEmail: string): Promise<eHR | null>;
-  createEHR(EHRData: Prisma.eHRCreateInput): Promise<eHR>; // Assuming repo returns the full eHR object or the service maps it.
-  getEHRs(): Promise<eHR[]>;
-  getEHRByPatientId(patientId: string): Promise<eHR | null>;
-  getEHRById(ehrId: string): Promise<EHRWithRelations | null>; // Service ensures relations are loaded.
-  updateEHRById(ehrId: string, EHRData: Prisma.eHRUpdateInput): Promise<eHR | null>;
-  deleteEHRById(ehrId: string): Promise<eHR | null>;
+  checkExistingEHR(patientEmail: string): Promise<EHR | null>;
+  createEHR(EHRData: Prisma.EHRCreateInput): Promise<EHR>;
+  getEHRs(): Promise<EHR[]>;
+  getEHRByPatientId(patientId: string): Promise<EHR | null>;
+  getEHRById(ehrId: string): Promise<EHRWithRelations | null>;
+  updateEHRById(
+    ehrId: string,
+    EHRData: Prisma.EHRUpdateInput
+  ): Promise<EHR | null>;
+  deleteEHRById(ehrId: string): Promise<EHR | null>;
 }

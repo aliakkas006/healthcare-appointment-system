@@ -1,4 +1,4 @@
-import { EmailOptions } from "@/types"; // This will resolve to services/email/src/types
+import { EmailOptions } from '@/types';
 
 export interface IEmailTransportService {
   send(options: EmailOptions): Promise<{ rejected: string[] }>;

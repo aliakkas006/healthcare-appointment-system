@@ -9,9 +9,4 @@ export interface IMessageQueueService {
    *          The promise may reject if publishing fails.
    */
   publish(exchange: string, routingKey: string, message: string): Promise<void>;
-
-  // Future considerations for a more complete interface (optional for now):
-  // connect?(): Promise<void>;
-  // close?(): Promise<void>;
-  // consume?(queue: string, onMessage: (msg: any) => Promise<void>, options?: any): Promise<void>;
 }

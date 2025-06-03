@@ -1,5 +1,5 @@
-import { IAuthUserRepository } from "./interfaces/IAuthUserRepository";
-import { User, PrismaClient, Prisma } from "@prisma/client";
+import { IAuthUserRepository } from './interfaces/IAuthUserRepository';
+import { User, PrismaClient, Prisma } from '@prisma/client';
 
 export class AuthUserRepository implements IAuthUserRepository {
   private readonly prismaClient: PrismaClient;
@@ -20,7 +20,10 @@ export class AuthUserRepository implements IAuthUserRepository {
     return this.prismaClient.user.create({ data: userData });
   }
 
-  async updateUser(id: string, data: Prisma.UserUpdateInput): Promise<User | null> {
+  async updateUser(
+    id: string,
+    data: Prisma.UserUpdateInput
+  ): Promise<User | null> {
     return this.prismaClient.user.update({
       where: { id },
       data,

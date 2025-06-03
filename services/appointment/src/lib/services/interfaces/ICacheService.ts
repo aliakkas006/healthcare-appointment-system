@@ -30,5 +30,5 @@ export interface ICacheService {
    * @param prefix The prefix to match against cache keys.
    * @returns A promise that resolves when the delete operation is complete.
    */
-  deleteAllWithPrefix?(prefix: string): Promise<void>; // Marked as optional for now
+  deleteAllWithPrefix?(prefix: string): Promise<void>;
 }

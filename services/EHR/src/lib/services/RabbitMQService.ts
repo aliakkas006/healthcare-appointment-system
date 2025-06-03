@@ -1,4 +1,4 @@
-import { IMessageQueueService } from "./interfaces/IMessageQueueService";
+import { IMessageQueueService } from './interfaces/IMessageQueueService';
 import amqp from 'amqplib';
 import { RABBITMQ_URL } from '@/config/config_url'; // Resolves to EHR service's config
 import logger from '@/config/logger'; // Resolves to EHR service's config
@@ -10,37 +10,50 @@ export class RabbitMQService implements IMessageQueueService {
     this.rabbitmqUrl = rabbitmqUrl || RABBITMQ_URL;
   }
 
-  async publish(exchangeName: string, routingKey: string, message: string): Promise<void> {
+  async publish(
+    exchangeName: string,
+    routingKey: string,
+    message: string
+  ): Promise<void> {
     let connection: amqp.Connection | null = null;
     try {
       connection = await amqp.connect(this.rabbitmqUrl);
       const channel = await connection.createChannel();
 
-      // Asserting the exchange; the type ('direct') and durability (true) are based on the existing utility.
-      // The exchangeName parameter allows flexibility if different exchanges are needed.
       await channel.assertExchange(exchangeName, 'direct', { durable: true });
 
       channel.publish(exchangeName, routingKey, Buffer.from(message));
-      logger.info(`Message sent to exchange "${exchangeName}" with routing key "${routingKey}": ${message}`);
+      logger.info(
+        `Message sent to exchange "${exchangeName}" with routing key "${routingKey}": ${message}`
+      );
 
       // Mimicking the original behavior of closing connection after a short delay.
       setTimeout(() => {
         if (connection) {
-          connection.close().then(() => logger.info('RabbitMQ connection closed after publish.'));
+          connection
+            .close()
+            .then(() =>
+              logger.info('RabbitMQ connection closed after publish.')
+            );
         }
       }, 500);
-
     } catch (error: any) {
-      logger.error(`Error publishing message to exchange "${exchangeName}", routing key "${routingKey}":`, error.message);
+      logger.error(
+        `Error publishing message to exchange "${exchangeName}", routing key "${routingKey}":`,
+        error.message
+      );
       if (connection) {
         try {
           await connection.close();
           logger.info('RabbitMQ connection closed due to error.');
         } catch (closeError: any) {
-          logger.error('Error closing RabbitMQ connection during error handling:', closeError.message);
+          logger.error(
+            'Error closing RabbitMQ connection during error handling:',
+            closeError.message
+          );
         }
       }
-      throw error; // Re-throw the original error
+      throw error; 
     }
   }
 }

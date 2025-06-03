@@ -1,4 +1,4 @@
-import { Patient, Prisma } from "@prisma/client";
+import { Patient, Prisma } from '@prisma/client';
 
 export interface IPatientService {
   checkExistingPatient(userId: string): Promise<Patient | null>;

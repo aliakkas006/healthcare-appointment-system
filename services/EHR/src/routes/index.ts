@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import prisma from '@/config/prisma';
-import redis from '@/config/redis'; // Assuming default export for ioredis instance
+import redis from '@/config/redis';
 
 // Repository Classes
 import { EHRRepository } from '@/lib/repositories/EHRRepository';
@@ -26,7 +26,7 @@ import {
   getEHRByPatientId,
   updateEHRById,
   deleteEHRById,
-  createPatient, // This is EHR's createPatient controller
+  createPatient,
   createMedication,
   getMedications,
   createDiagnosticReport,
@@ -37,7 +37,7 @@ const router = Router();
 
 // Instantiate Utility Components
 const cacheService = new RedisCacheService(redis);
-const messageQueueService = new RabbitMQService(); // Assumes default RabbitMQ_URL is handled internally
+const messageQueueService = new RabbitMQService();
 
 // Instantiate Repositories
 const ehrRepository = new EHRRepository(prisma);
@@ -46,9 +46,15 @@ const diagnosticReportRepository = new DiagnosticReportRepository(prisma);
 const ehrPatientRepository = new EHRPatientRepository(prisma);
 
 // Instantiate Core Services (Injecting Dependencies)
-const ehrCentralService = new EHRCentralService(ehrRepository, cacheService, messageQueueService);
+const ehrCentralService = new EHRCentralService(
+  ehrRepository,
+  cacheService,
+  messageQueueService
+);
 const medicationService = new MedicationService(medicationRepository);
-const diagnosticReportService = new DiagnosticReportService(diagnosticReportRepository);
+const diagnosticReportService = new DiagnosticReportService(
+  diagnosticReportRepository
+);
 const ehrPatientService = new EHRPatientService(ehrPatientRepository);
 
 // Route Definitions
@@ -59,21 +65,21 @@ router.get('/ehr', getEHRs(ehrCentralService));
 router.get('/ehr/:id', getEHRById(ehrCentralService));
 router.put('/ehr/:id', updateEHRById(ehrCentralService));
 router.delete('/ehr/:id', deleteEHRById(ehrCentralService));
-router.get('/ehr/patient/:patientId', getEHRByPatientId(ehrCentralService)); // Get EHR by its associated patientId
-
-// Patient creation specific to EHR context (e.g., if a patient record needs to exist before an EHR can be made for them)
+router.get('/ehr/patient/:patientId', getEHRByPatientId(ehrCentralService));
 router.post('/ehr/patient', createPatient(ehrPatientService));
 
 // Medication Routes (related to EHRs, but managed by MedicationService)
 router.post('/ehr/medications', createMedication(medicationService));
 router.get('/ehr/medications', getMedications(medicationService));
-// Note: Routes like GET /ehr/:ehrId/medications would typically be handled by a medication controller
-// that accepts ehrId and uses medicationService.getMedicationsByEhrId(ehrId).
-// The current getMedications gets ALL medications, not specific to an EHR via path.
 
 // Diagnostic Report Routes (related to EHRs, but managed by DiagnosticReportService)
-router.post('/ehr/diagnostic-reports', createDiagnosticReport(diagnosticReportService));
-router.get('/ehr/diagnostic-reports', getDiagnosticReports(diagnosticReportService));
-// Similar note for GET /ehr/:ehrId/diagnostic-reports
+router.post(
+  '/ehr/diagnostic-reports',
+  createDiagnosticReport(diagnosticReportService)
+);
+router.get(
+  '/ehr/diagnostic-reports',
+  getDiagnosticReports(diagnosticReportService)
+);
 
 export default router;

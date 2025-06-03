@@ -1,5 +1,5 @@
-import { IProviderService } from "../services/interfaces/IProviderService";
-import { IProviderRepository } from "../repositories/interfaces/IProviderRepository";
+import { IProviderService } from "./services/interfaces/IProviderService";
+import { IProviderRepository } from "./repositories/interfaces/IProviderRepository";
 import { HealthcareProvider, Prisma } from "@prisma/client";
 // Removed import of prisma from '@/config/prisma'
 

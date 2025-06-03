@@ -12,9 +12,9 @@ import { RedisCacheService } from '@/lib/services/RedisCacheService';
 import { RabbitMQService } from '@/lib/services/RabbitMQService';
 
 // Core Service Classes
-import { AppointmentService } from '@/lib/AppointmentService'; // Corrected: AppointmentService class
-import { PatientService } from '@/lib/PatientService';       // Corrected: PatientService class
-import { ProviderService } from '@/lib/ProviderService';     // Corrected: ProviderService class
+import { AppointmentService } from '@/lib/AppointmentService';
+import { PatientService } from '@/lib/PatientService';
+import { ProviderService } from '@/lib/ProviderService';
 
 // Controller Factory Functions
 import {
@@ -33,7 +33,7 @@ const router = Router();
 
 // Instantiate Utility Components
 const cacheService = new RedisCacheService(redis);
-const messageQueueService = new RabbitMQService(); // Assumes default RabbitMQ_URL is handled internally
+const messageQueueService = new RabbitMQService();
 
 // Instantiate Repositories
 const appointmentRepository = new AppointmentRepository(prisma);
@@ -41,7 +41,11 @@ const patientRepository = new PatientRepository(prisma);
 const providerRepository = new ProviderRepository(prisma);
 
 // Instantiate Core Services (Injecting Dependencies)
-const appointmentService = new AppointmentService(appointmentRepository, cacheService, messageQueueService);
+const appointmentService = new AppointmentService(
+  appointmentRepository,
+  cacheService,
+  messageQueueService
+);
 const patientService = new PatientService(patientRepository);
 const providerService = new ProviderService(providerRepository);
 
@@ -50,10 +54,15 @@ const providerService = new ProviderService(providerRepository);
 // Appointment Routes
 router.post('/appointments', createAppointment(appointmentService));
 router.get('/appointments', getAppointments(appointmentService));
-// Using more distinct paths to avoid ambiguity
 router.get('/appointments/detail/:id', getAppointmentById(appointmentService));
-router.delete('/appointments/detail/:id', deleteAppointmentById(appointmentService));
-router.get('/appointments/by-patient/:patientId', getAppointmentsByPatientId(appointmentService));
+router.delete(
+  '/appointments/detail/:id',
+  deleteAppointmentById(appointmentService)
+);
+router.get(
+  '/appointments/by-patient/:patientId',
+  getAppointmentsByPatientId(appointmentService)
+);
 
 // Patient Routes
 router.post('/patients', createPatient(patientService));

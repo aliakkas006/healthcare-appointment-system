@@ -1,5 +1,5 @@
-import { IMedicationRepository } from "./interfaces/IMedicationRepository";
-import { Medication, PrismaClient, Prisma } from "@prisma/client";
+import { IMedicationRepository } from './interfaces/IMedicationRepository';
+import { Medication, PrismaClient, Prisma } from '@prisma/client';
 
 export class MedicationRepository implements IMedicationRepository {
   private readonly prisma: PrismaClient;

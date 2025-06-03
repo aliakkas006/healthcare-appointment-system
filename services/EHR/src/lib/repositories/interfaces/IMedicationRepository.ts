@@ -1,4 +1,4 @@
-import { Medication, Prisma } from "@prisma/client";
+import { Medication, Prisma } from '@prisma/client';
 
 export interface IMedicationRepository {
   create(data: Prisma.MedicationCreateInput): Promise<Medication>;

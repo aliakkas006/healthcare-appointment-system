@@ -1,6 +1,6 @@
-import { IPatientService } from "../services/interfaces/IPatientService";
-import { IPatientRepository } from "../repositories/interfaces/IPatientRepository";
-import { Patient, Prisma } from "@prisma/client";
+import { IPatientService } from './services/interfaces/IPatientService';
+import { IPatientRepository } from './repositories/interfaces/IPatientRepository';
+import { Patient, Prisma } from '@prisma/client';
 // Removed import of prisma from '@/config/prisma'
 
 export class PatientService implements IPatientService {
@@ -20,7 +20,9 @@ export class PatientService implements IPatientService {
   /**
    * Create a new patient
    */
-  async createPatient(patientData: Prisma.PatientCreateInput): Promise<Patient> {
+  async createPatient(
+    patientData: Prisma.PatientCreateInput
+  ): Promise<Patient> {
     return this.patientRepository.create(patientData);
   }
 

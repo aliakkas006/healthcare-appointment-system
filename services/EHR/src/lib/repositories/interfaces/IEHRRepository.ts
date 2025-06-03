@@ -1,18 +1,18 @@
-import { eHR, Prisma, Medication, DiagnosticReport } from "@prisma/client";
+import { EHR, Prisma, Medication, DiagnosticReport } from '@prisma/client';
 
 // This type can be defined here or in a central types file if used across services
-export type EHRWithRelations = eHR & {
+export type EHRWithRelations = EHR & {
   medications: Medication[];
   diagnosticReports: DiagnosticReport[];
 };
 
 export interface IEHRRepository {
-  findByPatientEmail(patientEmail: string): Promise<eHR | null>;
-  create(data: Prisma.eHRCreateInput): Promise<eHR>;
-  findMany(): Promise<eHR[]>;
-  findFirstByPatientId(patientId: string): Promise<eHR | null>;
-  findById(id: string): Promise<eHR | null>; // Basic find by ID
-  findByIdWithRelations(id: string): Promise<EHRWithRelations | null>; // For fetching EHR with its relations
-  update(id: string, data: Prisma.eHRUpdateInput): Promise<eHR | null>;
-  deleteById(id: string): Promise<eHR | null>;
+  findByPatientEmail(patientEmail: string): Promise<EHR | null>;
+  create(data: Prisma.EHRCreateInput): Promise<EHR>;
+  findMany(): Promise<EHR[]>;
+  findFirstByPatientId(patientId: string): Promise<EHR | null>;
+  findById(id: string): Promise<EHR | null>;
+  findByIdWithRelations(id: string): Promise<EHRWithRelations | null>;
+  update(id: string, data: Prisma.EHRUpdateInput): Promise<EHR | null>;
+  deleteById(id: string): Promise<EHR | null>;
 }

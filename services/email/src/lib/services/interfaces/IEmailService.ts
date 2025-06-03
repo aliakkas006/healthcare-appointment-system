@@ -1,25 +1,20 @@
-import { Email } from "@prisma/client";
-import { EmailData } from "@/types"; // Resolves to services/email/src/types
+import { Email } from '@prisma/client';
+import { EmailData } from '@/types';
 
-// Define more specific types for appointment and EHR data if possible in future
 export interface AppointmentEmailData {
-  // Define properties based on what processEmailAppointment expects
-  // Example:
   recipient: string;
   patientName?: string;
   doctorName?: string;
   appointmentDate?: string;
   appointmentTime?: string;
-  [key: string]: any; // Allow other properties for now
+  [key: string]: any;
 }
 
 export interface EHREmailData {
-  // Define properties based on what processEmailEHR expects
-  // Example:
   recipient: string;
   patientName?: string;
   recordType?: string;
-  [key: string]: any; // Allow other properties for now
+  [key: string]: any;
 }
 
 export interface IEmailService {

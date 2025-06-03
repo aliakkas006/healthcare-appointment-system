@@ -1,5 +1,5 @@
-import { IProviderRepository } from "./interfaces/IProviderRepository";
-import { HealthcareProvider, PrismaClient, Prisma } from "@prisma/client";
+import { IProviderRepository } from './interfaces/IProviderRepository';
+import { HealthcareProvider, PrismaClient, Prisma } from '@prisma/client';
 
 export class ProviderRepository implements IProviderRepository {
   private readonly prisma: PrismaClient;
@@ -12,7 +12,9 @@ export class ProviderRepository implements IProviderRepository {
     return this.prisma.healthcareProvider.findUnique({ where: { userId } });
   }
 
-  async create(data: Prisma.HealthcareProviderCreateInput): Promise<HealthcareProvider> {
+  async create(
+    data: Prisma.HealthcareProviderCreateInput
+  ): Promise<HealthcareProvider> {
     return this.prisma.healthcareProvider.create({ data });
   }
 

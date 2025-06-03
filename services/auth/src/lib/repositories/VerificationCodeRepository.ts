@@ -1,5 +1,5 @@
-import { IVerificationCodeRepository } from "./interfaces/IVerificationCodeRepository";
-import { VerificationCode, PrismaClient, Prisma } from "@prisma/client";
+import { IVerificationCodeRepository } from './interfaces/IVerificationCodeRepository';
+import { VerificationCode, PrismaClient, Prisma } from '@prisma/client';
 
 export class VerificationCodeRepository implements IVerificationCodeRepository {
   private readonly prismaClient: PrismaClient;
@@ -8,15 +8,22 @@ export class VerificationCodeRepository implements IVerificationCodeRepository {
     this.prismaClient = prismaClient;
   }
 
-  async create(data: Prisma.VerificationCodeCreateInput): Promise<VerificationCode> {
+  async create(
+    data: Prisma.VerificationCodeCreateInput
+  ): Promise<VerificationCode> {
     return this.prismaClient.verificationCode.create({ data });
   }
 
-  async findFirst(criteria: Prisma.VerificationCodeFindFirstArgs['where']): Promise<VerificationCode | null> {
+  async findFirst(
+    criteria: Prisma.VerificationCodeFindFirstArgs['where']
+  ): Promise<VerificationCode | null> {
     return this.prismaClient.verificationCode.findFirst({ where: criteria });
   }
 
-  async update(id: string, data: Prisma.VerificationCodeUpdateInput): Promise<VerificationCode | null> {
+  async update(
+    id: string,
+    data: Prisma.VerificationCodeUpdateInput
+  ): Promise<VerificationCode | null> {
     return this.prismaClient.verificationCode.update({
       where: { id },
       data,

@@ -1,5 +1,5 @@
-import { ILoginHistoryRepository } from "./interfaces/ILoginHistoryRepository";
-import { LoginHistory, PrismaClient, Prisma } from "@prisma/client";
+import { ILoginHistoryRepository } from './interfaces/ILoginHistoryRepository';
+import { LoginHistory, PrismaClient, Prisma } from '@prisma/client';
 
 export class LoginHistoryRepository implements ILoginHistoryRepository {
   private readonly prismaClient: PrismaClient;

@@ -1,5 +1,5 @@
-import { IDiagnosticReportRepository } from "./interfaces/IDiagnosticReportRepository";
-import { DiagnosticReport, PrismaClient, Prisma } from "@prisma/client";
+import { IDiagnosticReportRepository } from './interfaces/IDiagnosticReportRepository';
+import { DiagnosticReport, PrismaClient, Prisma } from '@prisma/client';
 
 export class DiagnosticReportRepository implements IDiagnosticReportRepository {
   private readonly prisma: PrismaClient;
@@ -8,7 +8,9 @@ export class DiagnosticReportRepository implements IDiagnosticReportRepository {
     this.prisma = prismaClient;
   }
 
-  async create(data: Prisma.DiagnosticReportCreateInput): Promise<DiagnosticReport> {
+  async create(
+    data: Prisma.DiagnosticReportCreateInput
+  ): Promise<DiagnosticReport> {
     return this.prisma.diagnosticReport.create({ data });
   }
 

@@ -1,5 +1,5 @@
-import { IEHRRepository, EHRWithRelations } from "./interfaces/IEHRRepository";
-import { eHR, Medication, DiagnosticReport, PrismaClient, Prisma } from "@prisma/client";
+import { IEHRRepository, EHRWithRelations } from './interfaces/IEHRRepository';
+import { EHR, PrismaClient, Prisma } from '@prisma/client';
 
 export class EHRRepository implements IEHRRepository {
   private readonly prisma: PrismaClient;
@@ -8,23 +8,23 @@ export class EHRRepository implements IEHRRepository {
     this.prisma = prismaClient;
   }
 
-  async findByPatientEmail(patientEmail: string): Promise<eHR | null> {
+  async findByPatientEmail(patientEmail: string): Promise<EHR | null> {
     return this.prisma.eHR.findUnique({ where: { patientEmail } });
   }
 
-  async create(data: Prisma.eHRCreateInput): Promise<eHR> {
+  async create(data: Prisma.EHRCreateInput): Promise<EHR> {
     return this.prisma.eHR.create({ data });
   }
 
-  async findMany(): Promise<eHR[]> {
+  async findMany(): Promise<EHR[]> {
     return this.prisma.eHR.findMany();
   }
 
-  async findFirstByPatientId(patientId: string): Promise<eHR | null> {
+  async findFirstByPatientId(patientId: string): Promise<EHR | null> {
     return this.prisma.eHR.findFirst({ where: { patientId } });
   }
 
-  async findById(id: string): Promise<eHR | null> {
+  async findById(id: string): Promise<EHR | null> {
     return this.prisma.eHR.findUnique({ where: { id } });
   }
 
@@ -36,28 +36,32 @@ export class EHRRepository implements IEHRRepository {
         diagnosticReports: true,
       },
     });
-    // Ensure the return type matches EHRWithRelations, especially if relations can be undefined
-    // Prisma's include typically makes them arrays (empty if no relations) or null if the main record not found.
-    // If ehrWithRelations is null, we return null. Otherwise, it matches the type.
+
     return ehrWithRelations as EHRWithRelations | null;
   }
 
-  async update(id: string, data: Prisma.eHRUpdateInput): Promise<eHR | null> {
+  async update(id: string, data: Prisma.EHRUpdateInput): Promise<EHR | null> {
     try {
       return await this.prisma.eHR.update({ where: { id }, data });
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2025'
+      ) {
         return null;
       }
       throw error;
     }
   }
 
-  async deleteById(id: string): Promise<eHR | null> {
+  async deleteById(id: string): Promise<EHR | null> {
     try {
       return await this.prisma.eHR.delete({ where: { id } });
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2025'
+      ) {
         return null;
       }
       throw error;
