@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
-import ehrService from '@/lib/EHRService';
+import { IEHRService } from '@/lib/services/interfaces/IEHRService'; // Changed import
 
-const getEHRByPatientId = async (
+const getEHRByPatientId = (ehrService: IEHRService) => async (
   req: Request,
   res: Response,
   next: NextFunction
@@ -9,10 +9,11 @@ const getEHRByPatientId = async (
   try {
     const { patientId } = req.params;
 
+    // Get EHR by patient ID using the injected service
     const EHR = await ehrService.getEHRByPatientId(patientId);
 
     if (!EHR) {
-      return res.status(404).json({ message: 'EHR not found' });
+      return res.status(404).json({ message: 'EHR not found for this patient' });
     }
 
     res.status(200).json({ message: 'EHR fetched successfully', EHR });

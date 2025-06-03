@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 import { DiagnosticReportCreateSchema } from '@/schemas';
-import ehrService from '@/lib/EHRService';
+import { IDiagnosticReportService } from '@/lib/services/interfaces/IDiagnosticReportService'; // Changed import
 
-const createDiagnosticReport = async (
+const createDiagnosticReport = (diagnosticReportService: IDiagnosticReportService) => async (
   req: Request,
   res: Response,
   next: NextFunction
@@ -11,11 +11,12 @@ const createDiagnosticReport = async (
     // Validate the request body
     const parsedBody = DiagnosticReportCreateSchema.safeParse(req.body);
     if (!parsedBody.success) {
-      return res.status(400).json({ message: parsedBody.error.errors });
+      // Consistent error response
+      return res.status(400).json({ errors: parsedBody.error.errors });
     }
 
-    // Create the DiagnosticReport
-    const diagnosticReport = await ehrService.createDiagnosticReport(
+    // Create the DiagnosticReport using the injected service
+    const diagnosticReport = await diagnosticReportService.createDiagnosticReport(
       parsedBody.data
     );
 

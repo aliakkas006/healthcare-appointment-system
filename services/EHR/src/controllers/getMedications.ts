@@ -1,14 +1,14 @@
 import { Request, Response, NextFunction } from 'express';
-import ehrService from '@/lib/EHRService';
+import { IMedicationService } from '@/lib/services/interfaces/IMedicationService'; // Changed import
 
-const getMedications = async (
-  _req: Request,
+const getMedications = (medicationService: IMedicationService) => async (
+  _req: Request, // Underscore if not used
   res: Response,
   next: NextFunction
 ) => {
   try {
-    // Get all Medications
-    const medications = await ehrService.getMedications();
+    // Get all Medications using the injected service
+    const medications = await medicationService.getMedications();
 
     return res.status(200).json(medications);
   } catch (err) {
