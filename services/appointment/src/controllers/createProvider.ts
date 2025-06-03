@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
-import providerService from '@/lib/ProviderService';
 import { ProviderCreateSchema } from '@/schemas';
+import { IProviderService } from '@/lib/services/interfaces/IProviderService';
 
-const createProvider = async (
+export default (providerService: IProviderService) => async (
   req: Request,
   res: Response,
   next: NextFunction
@@ -12,10 +12,11 @@ const createProvider = async (
     const parsedBody = ProviderCreateSchema.safeParse(req.body);
 
     if (!parsedBody.success) {
-      return res.status(400).json({ message: parsedBody.error.errors });
+      return res.status(400).json({ errors: parsedBody.error.errors }); // Use 'errors' for consistency
     }
 
     const { userId } = parsedBody.data;
+    // Check if the provider already exists using the injected service
     const existingProvider = await providerService.checkExistingProvider(userId);
 
     if (existingProvider) {
@@ -24,6 +25,7 @@ const createProvider = async (
         .json({ message: 'Healthcare Provider already exists!' });
     }
 
+    // Create the provider using the injected service
     const healthcareProvider = await providerService.createProvider(
       parsedBody.data
     );
@@ -38,5 +40,3 @@ const createProvider = async (
     next(err);
   }
 };
-
-export default createProvider;

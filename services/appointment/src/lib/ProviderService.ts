@@ -1,34 +1,35 @@
-import prisma from '@/config/prisma';
+import { IProviderService } from "../services/interfaces/IProviderService";
+import { IProviderRepository } from "../repositories/interfaces/IProviderRepository";
+import { HealthcareProvider, Prisma } from "@prisma/client";
+// Removed import of prisma from '@/config/prisma'
 
-class ProviderService {
+export class ProviderService implements IProviderService {
+  private readonly providerRepository: IProviderRepository;
+
+  constructor(providerRepository: IProviderRepository) {
+    this.providerRepository = providerRepository;
+  }
+
   /**
-   * Check if the healthcare provider already exists
+   * Check if the healthcare provider already exists by userId
    */
-  public async checkExistingProvider(userId: string) {
-    return prisma.healthcareProvider.findUnique({
-      where: {
-        userId,
-      },
-    });
+  async checkExistingProvider(userId: string): Promise<HealthcareProvider | null> {
+    return this.providerRepository.findByUserId(userId);
   }
 
   /**
    * Create a new healthcare provider
    */
-  public async createProvider(Providerdata: any) {
-    return prisma.healthcareProvider.create({
-      data: Providerdata,
-    });
+  async createProvider(providerData: Prisma.HealthcareProviderCreateInput): Promise<HealthcareProvider> {
+    return this.providerRepository.create(providerData);
   }
 
   /**
    * Get all healthcare providers
    */
-  public async getProviders() {
-    return prisma.healthcareProvider.findMany();
+  async getProviders(): Promise<HealthcareProvider[]> {
+    return this.providerRepository.findMany();
   }
 }
 
-const providerService = new ProviderService();
-
-export default providerService;
+export default ProviderService;

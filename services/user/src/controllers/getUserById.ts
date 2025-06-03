@@ -1,11 +1,11 @@
 import { Request, Response, NextFunction } from 'express';
-import userService from '@/lib/UserService';
+import { IUserService } from '@/lib/IUserService';
 
 /**
  * Get user by id or authUserId
  * /users/:id?field=id|authUserId
  */
-const getUserById = async (req: Request, res: Response, next: NextFunction) => {
+export default (userService: IUserService) => async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;
     const field = req.query.field as string;
@@ -21,5 +21,3 @@ const getUserById = async (req: Request, res: Response, next: NextFunction) => {
     next(error);
   }
 };
-
-export default getUserById;

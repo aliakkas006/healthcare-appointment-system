@@ -1,18 +1,15 @@
 import { Request, Response, NextFunction } from 'express';
-import providerService from '@/lib/ProviderService';
+import { IProviderService } from '@/lib/services/interfaces/IProviderService';
 
-const getProviders = async (
-  _req: Request,
+export default (providerService: IProviderService) => async (
+  _req: Request, // Underscore if not used
   res: Response,
   next: NextFunction
 ) => {
   try {
     const providers = await providerService.getProviders();
-
     return res.status(200).json(providers);
   } catch (err) {
     next(err);
   }
 };
-
-export default getProviders;

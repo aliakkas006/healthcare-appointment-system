@@ -1,33 +1,38 @@
-import prisma from '@/config/prisma';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { LoginHistory } from '@/types';
+import { User } from '@prisma/client';
+import { ILoginService } from './services/interfaces/ILoginService';
+import { IAuthUserRepository } from './repositories/interfaces/IAuthUserRepository';
+import { ILoginHistoryRepository } from './repositories/interfaces/ILoginHistoryRepository';
 
-class UserLoginService {
+class LoginService implements ILoginService {
+  private readonly authUserRepository: IAuthUserRepository;
+  private readonly loginHistoryRepository: ILoginHistoryRepository;
+
+  constructor(
+    authUserRepository: IAuthUserRepository,
+    loginHistoryRepository: ILoginHistoryRepository
+  ) {
+    this.authUserRepository = authUserRepository;
+    this.loginHistoryRepository = loginHistoryRepository;
+  }
+
   /**
    * Create login history
    */
   public async createLoginHistory(info: LoginHistory): Promise<void> {
-    await prisma.loginHistory.create({
-      data: {
-        userId: info.userId,
-        userAgent: info.userAgent,
-        ipAddress: info.ipAddress,
-        attempt: info.attempt,
-      },
-    });
+    // The interface ILoginHistoryRepository.create returns Promise<LoginHistory>
+    // If void is strictly needed, we don't return its result.
+    await this.loginHistoryRepository.create(info);
   }
 
   /**
    * Login user with email and password
    */
-  public async login(email: string, password: string) {
+  public async login(email: string, password: string): Promise<User> {
     // check if the user exists
-    const user = await prisma.user.findUnique({
-      where: {
-        email,
-      },
-    });
+    const user = await this.authUserRepository.findByEmail(email);
     if (!user) {
       throw new Error('Invalid credentials');
     }
@@ -59,7 +64,7 @@ class UserLoginService {
     email: string,
     name: string,
     role: string
-  ) {
+  ): string {
     return jwt.sign(
       { userId, email, name, role },
       process.env.JWT_SECRET ?? 'My_Secret_Key',
@@ -68,6 +73,4 @@ class UserLoginService {
   }
 }
 
-const loginService = new UserLoginService();
-
-export default loginService;
+export default LoginService;

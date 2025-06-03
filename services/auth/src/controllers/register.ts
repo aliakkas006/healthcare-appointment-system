@@ -1,10 +1,13 @@
 import { Response, Request, NextFunction } from 'express';
 import { UserCreateSchema } from '@/schemas';
-import registrationService from '@/lib/RegistrationService';
-import emailService from '@/lib/EmailService';
+import { IRegistrationService } from '@/lib/services/interfaces/IRegistrationService';
+import { IAuthEmailService } from '@/lib/services/interfaces/IAuthEmailService';
 import generateVerificationCode from '@/utils/generateVerificationCode';
 
-const register = async (req: Request, res: Response, next: NextFunction) => {
+export default (
+  registrationService: IRegistrationService,
+  authEmailService: IAuthEmailService
+) => async (req: Request, res: Response, next: NextFunction) => {
   try {
     // Validate the request body
     const parsedBody = UserCreateSchema.safeParse(req.body);
@@ -15,29 +18,27 @@ const register = async (req: Request, res: Response, next: NextFunction) => {
     const { name, email } = parsedBody.data;
 
     // Check if the user already exists
-    const existingUser = await registrationService.checkExistingUser(email);
+    const existingUser = await registrationService.checkExistingUser(email); // Use injected service
     if (existingUser) {
       return res.status(400).json({ message: 'User already exists' });
     }
 
     // Create the auth user and user profile
-    const user = await registrationService.createUser(parsedBody.data);
-    await registrationService.createUserProfile(user.id, name, email);
+    const user = await registrationService.createUser(parsedBody.data); // Use injected service
+    await registrationService.createUserProfile(user.id, name, email); // Use injected service
 
     // Generate verification code and save it to the database
     const code = generateVerificationCode();
-    await emailService.createVerificationCode(user.id, code);
+    await authEmailService.createVerificationCode(user.id, code); // Use injected service
 
     // Send verification email
-    await emailService.sendVerificationEmail(email, code);
+    await authEmailService.sendVerificationEmail(email, code); // Use injected service
 
     return res.status(201).json({
       message: 'User created. Check your email for verification code',
-      user,
+      user, // This user object comes from registrationService.createUser
     });
   } catch (error) {
     next(error);
   }
 };
-
-export default register;

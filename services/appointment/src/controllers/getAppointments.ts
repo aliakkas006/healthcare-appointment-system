@@ -1,18 +1,15 @@
 import { Request, Response, NextFunction } from 'express';
-import appointmentService from '@/lib/AppointmentService';
+import { IAppointmentService } from '@/lib/services/interfaces/IAppointmentService';
 
-const getAppointments = async (
-  _req: Request,
+export default (appointmentService: IAppointmentService) => async (
+  _req: Request, // Underscore if not used
   res: Response,
   next: NextFunction
 ) => {
   try {
     const appointments = await appointmentService.getAppointments();
-    
     res.status(200).json(appointments);
   } catch (err) {
     next(err);
   }
 };
-
-export default getAppointments;

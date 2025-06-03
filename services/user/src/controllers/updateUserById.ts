@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
-import userService from '@/lib/UserService';
+import { IUserService } from '@/lib/IUserService';
 import { UserUpdateSchema } from '@/schemas';
 
-const updateUserById = async (
+export default (userService: IUserService) => async (
   req: Request,
   res: Response,
   next: NextFunction
@@ -27,5 +27,3 @@ const updateUserById = async (
     next(err);
   }
 };
-
-export default updateUserById;
