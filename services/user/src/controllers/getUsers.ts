@@ -1,14 +1,12 @@
-import userService from '@/lib/UserService';
 import { Request, Response, NextFunction } from 'express';
+import { IUserService } from '@/lib/IUserService';
 
-const getUsers = async (_req: Request, res: Response, next: NextFunction) => {
-  try {
-    const users = await userService.getUsers();
-
-    res.status(200).json(users);
-  } catch (err) {
-    next(err);
-  }
-};
-
-export default getUsers;
+export default (userService: IUserService) =>
+  async (_req: Request, res: Response, next: NextFunction) => {
+    try {
+      const users = await userService.getUsers();
+      res.status(200).json(users);
+    } catch (err) {
+      next(err);
+    }
+  };

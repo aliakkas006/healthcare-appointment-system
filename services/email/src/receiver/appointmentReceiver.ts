@@ -1,6 +1,6 @@
 import amqp from 'amqplib';
 import { RABBITMQ_URL } from '@/config/config_url';
-import emailService from '@/libs/EmailService';
+import emailService from '../lib/services/MainEmailService';
 import logger from '@/config/logger';
 
 const appointmentReceiver = async (

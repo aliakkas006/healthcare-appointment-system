@@ -15,7 +15,7 @@ describe('userService', () => {
       id: 'user1',
       name: 'Ali Akkas',
       email: 'ali@gmail.com',
-        password: expect.any(String),
+      password: expect.any(String),
     });
   });
 });

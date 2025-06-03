@@ -1,49 +1,23 @@
-import { defaultSender } from '@/config/config_url';
-import logger from '@/config/logger';
-import emailService from '@/libs/EmailService';
+import logger from '@/config/logger'; // Keep logger if used for controller-specific logging
+import { IEmailService } from '@/lib/services/interfaces/IEmailService';
 import { EmailCreateSchema } from '@/schemas';
 import { Request, Response, NextFunction } from 'express';
 
-const sendEmail = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    // Validate the request body
-    const parsedBody = EmailCreateSchema.safeParse(req.body);
+export default (emailService: IEmailService) =>
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      // Validate the request body
+      const parsedBody = EmailCreateSchema.safeParse(req.body);
 
-    if (!parsedBody.success) {
-      return res.status(400).json({ errors: parsedBody.error.errors });
+      if (!parsedBody.success) {
+        return res.status(400).json({ errors: parsedBody.error.errors });
+      }
+
+      await emailService.sendGenericEmail(parsedBody.data);
+
+      return res.status(200).json({ message: 'Email processed successfully' });
+    } catch (err) {
+      logger.error('Error in sendEmail controller:', err);
+      next(err);
     }
-
-    const { sender, recipient, subject, body, source } = parsedBody.data;
-
-    // Define the email options
-    const emailOptions = {
-      from: sender || defaultSender,
-      to: recipient,
-      subject,
-      text: body,
-    };
-
-    // Send the email
-    const { rejected } = await emailService.sendEmail(emailOptions);
-
-    if (rejected.length) {
-      logger.info('Email rejected', rejected);
-      return res.status(500).json({ message: 'Failed' });
-    }
-
-    // Save the email to the database
-    await emailService.saveEmailToDB({
-      sender,
-      recipient,
-      subject,
-      body,
-      source,
-    });
-
-    return res.status(200).json({ message: 'Email Sent successfully' });
-  } catch (err) {
-    next(err);
-  }
-};
-
-export default sendEmail;
+  };

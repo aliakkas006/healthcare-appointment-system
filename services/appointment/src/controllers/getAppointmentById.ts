@@ -1,21 +1,19 @@
 import { Request, Response, NextFunction } from 'express';
-import appointmentService from '@/lib/AppointmentService';
+import { IAppointmentService } from '@/lib/services/interfaces/IAppointmentService';
 
-const getAppointmentById = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const { appointmentId } = req.params;
-    const appointment = await appointmentService.getAppointmentById(
-      appointmentId
-    );
+export default (appointmentService: IAppointmentService) =>
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { appointmentId } = req.params;
+      const appointment = await appointmentService.getAppointmentById(
+        appointmentId
+      );
 
-    res.status(200).json(appointment);
-  } catch (err) {
-    next(err);
-  }
-};
-
-export default getAppointmentById;
+      if (!appointment) {
+        return res.status(404).json({ message: 'Appointment not found' });
+      }
+      res.status(200).json(appointment);
+    } catch (err) {
+      next(err);
+    }
+  };

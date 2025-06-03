@@ -1,0 +1,65 @@
+import { IAppointmentRepository } from './interfaces/IAppointmentRepository';
+import { Appointment, PrismaClient, Prisma } from '@prisma/client';
+
+export class AppointmentRepository implements IAppointmentRepository {
+  private readonly prisma: PrismaClient;
+
+  constructor(prismaClient: PrismaClient) {
+    this.prisma = prismaClient;
+  }
+
+  async create(data: Prisma.AppointmentCreateInput): Promise<Appointment> {
+    return this.prisma.appointment.create({ data });
+  }
+
+  async findMany(): Promise<Appointment[]> {
+    return this.prisma.appointment.findMany();
+  }
+
+  async findManyByPatientId(patientId: string): Promise<Appointment[]> {
+    return this.prisma.appointment.findMany({ where: { patientId } });
+  }
+
+  async findManyByProviderId(providerId: string): Promise<Appointment[]> {
+    return this.prisma.appointment.findMany({ where: { providerId } });
+  }
+
+  async findById(id: string): Promise<Appointment | null> {
+    return this.prisma.appointment.findUnique({ where: { id } });
+  }
+
+  async update(
+    id: string,
+    data: Prisma.AppointmentUpdateInput
+  ): Promise<Appointment | null> {
+    try {
+      return await this.prisma.appointment.update({ where: { id }, data });
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2025'
+      ) {
+        return null;
+      }
+      throw error;
+    }
+  }
+
+  async deleteById(id: string): Promise<Appointment | null> {
+    try {
+      return await this.prisma.appointment.delete({ where: { id } });
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2025'
+      ) {
+        return null;
+      }
+      throw error;
+    }
+  }
+
+  async findManyByDate(date: string): Promise<Appointment[]> {
+    return this.prisma.appointment.findMany({ where: { date } });
+  }
+}

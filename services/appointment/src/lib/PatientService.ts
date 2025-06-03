@@ -1,43 +1,44 @@
-import prisma from '@/config/prisma';
+import { IPatientService } from './services/interfaces/IPatientService';
+import { IPatientRepository } from './repositories/interfaces/IPatientRepository';
+import { Patient, Prisma } from '@prisma/client';
+// Removed import of prisma from '@/config/prisma'
 
-class PatientService {
+export class PatientService implements IPatientService {
+  private readonly patientRepository: IPatientRepository;
+
+  constructor(patientRepository: IPatientRepository) {
+    this.patientRepository = patientRepository;
+  }
+
   /**
-   * Check if the patient already exists
+   * Check if the patient already exists by userId
    */
-  public async checkExistingPatient(userId: string) {
-    return prisma.patient.findUnique({
-      where: { userId },
-    });
+  async checkExistingPatient(userId: string): Promise<Patient | null> {
+    return this.patientRepository.findByUserId(userId);
   }
 
   /**
    * Create a new patient
    */
-  public async createPatient(patientData: any) {
-    const patient = await prisma.patient.create({
-      data: patientData,
-    });
-
-    return patient;
+  async createPatient(
+    patientData: Prisma.PatientCreateInput
+  ): Promise<Patient> {
+    return this.patientRepository.create(patientData);
   }
 
   /**
    * Get all patients
    */
-  public async getPatients() {
-    return prisma.patient.findMany();
+  async getPatients(): Promise<Patient[]> {
+    return this.patientRepository.findMany();
   }
 
   /**
    * Get patient by patientId
    */
-  public async getPatientById(patientId: string) {
-    return prisma.patient.findUnique({
-      where: { id: patientId },
-    });
+  async getPatientById(patientId: string): Promise<Patient | null> {
+    return this.patientRepository.findById(patientId);
   }
 }
 
-const patientService = new PatientService();
-
-export default patientService;
+export default PatientService;

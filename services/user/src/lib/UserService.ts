@@ -1,29 +1,28 @@
-import prisma from '@/config/prisma';
 import { User } from '@prisma/client';
+import { IUserService } from './IUserService';
+import { IUserRepository } from './IUserRepository';
 
-class UserService {
+class UserService implements IUserService {
+  private readonly userRepository: IUserRepository;
+
+  constructor(userRepository: IUserRepository) {
+    this.userRepository = userRepository;
+  }
+
   /**
    * Check if the authUserId already exists
    * @param authUserId
    */
-  public async checkExistingUser(authUserId: string) {
-    const existingUser = await prisma.user.findUnique({
-      where: { authUserId },
-    });
-
-    return existingUser;
+  public async checkExistingUser(authUserId: string): Promise<User | null> {
+    return this.userRepository.findByAuthId(authUserId);
   }
 
   /**
    * Create a new user
    * @param userData
    */
-  public async createUser(userData: any) {
-    const user = await prisma.user.create({
-      data: userData,
-    });
-
-    return user;
+  public async createUser(userData: any): Promise<User> {
+    return this.userRepository.create(userData);
   }
 
   /**
@@ -31,16 +30,12 @@ class UserService {
    * @param id
    * @param field
    */
-  public async getUserById(id: string, field: string) {
-    let user: User | null;
-
+  public async getUserById(id: string, field: string): Promise<User | null> {
     if (field === 'authUserId') {
-      user = await prisma.user.findUnique({ where: { authUserId: id } });
+      return this.userRepository.findByAuthId(id);
     } else {
-      user = await prisma.user.findUnique({ where: { id } });
+      return this.userRepository.findById(id);
     }
-
-    return user;
   }
 
   /**
@@ -48,25 +43,16 @@ class UserService {
    * @param id
    * @param data
    */
-  public async updateUserById(id: string, userData: any) {
-    const updatedUser = await prisma.user.update({
-      where: { id },
-      data: userData,
-    });
-
-    return updatedUser;
+  public async updateUserById(id: string, userData: any): Promise<User | null> {
+    return this.userRepository.update(id, userData);
   }
 
   /**
    * Delete user by id
    * @param id
    */
-  public async deleteUserById(id: string) {
-    const deletedUser = await prisma.user.delete({
-      where: { id },
-    });
-
-    return deletedUser;
+  public async deleteUserById(id: string): Promise<User | null> {
+    return this.userRepository.delete(id);
   }
 
   /**
@@ -74,10 +60,8 @@ class UserService {
    * @returns {Promise<User[]>}
    */
   public async getUsers(): Promise<User[]> {
-    return prisma.user.findMany();
+    return this.userRepository.findAll();
   }
 }
 
-const userService = new UserService();
-
-export default userService;
+export default UserService;

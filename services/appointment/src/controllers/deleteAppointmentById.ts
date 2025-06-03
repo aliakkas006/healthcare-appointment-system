@@ -1,19 +1,22 @@
 import { Request, Response, NextFunction } from 'express';
-import appointmentService from '@/lib/AppointmentService';
+import { IAppointmentService } from '@/lib/services/interfaces/IAppointmentService';
 
-const deleteAppointmentById = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const { appointmentId } = req.params;
-    await appointmentService.deleteAppointment(appointmentId);
+export default (appointmentService: IAppointmentService) =>
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { appointmentId } = req.params;
+      const deletedAppointment = await appointmentService.deleteAppointment(
+        appointmentId
+      );
 
-    res.status(204).send();
-  } catch (err) {
-    next(err);
-  }
-};
+      if (!deletedAppointment) {
+        return res
+          .status(404)
+          .json({ message: 'Appointment not found or already deleted' });
+      }
 
-export default deleteAppointmentById;
+      res.status(204).send();
+    } catch (err) {
+      next(err);
+    }
+  };
