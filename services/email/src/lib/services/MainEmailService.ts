@@ -43,7 +43,7 @@ export class MainEmailService implements IEmailService {
       // Depending on policy, might re-throw or just log and proceed to save.
       // For now, we log and proceed to save the attempt.
     }
-    
+
     // Save the email record
     await this.emailRepository.createEmailRecord(data);
   }
@@ -83,7 +83,7 @@ export class MainEmailService implements IEmailService {
       body: data.body || `Please review your latest EHR information. Record type: ${data.recordType}`, // Use body from data or construct
       source: 'EHR',
     };
-    
+
     try {
       await this.sendGenericEmail(emailData);
       logger.info(`EHR notification email processed for: ${data.recipient}`);

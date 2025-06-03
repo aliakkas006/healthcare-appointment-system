@@ -46,7 +46,7 @@ class RegistrationService implements IRegistrationService {
       ...userData,
       password: hashedPassword,
     });
-    
+
     // If specific fields were previously selected (id, email, name, role, status, verified),
     // and the repository returns more, this is fine. If it returns less, this might be an issue.
     // The IAuthUserRepository.createUser returns Promise<User>, which implies all fields.

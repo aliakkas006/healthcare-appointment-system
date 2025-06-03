@@ -30,14 +30,14 @@ class TokenService implements ITokenService {
     // Ensure decoded is not a string and has userId property
     if (typeof decoded === 'string' || !('userId' in decoded)) {
       // Or throw an error, depending on how invalid decoded payloads should be handled
-      return null; 
+      return null;
     }
 
     // The repository's findById method should return the full User object or necessary fields.
     // The previous 'select' clause is now implicitly handled by the repository.
     // IAuthUserRepository.findById returns Promise<User | null>
     const user = await this.authUserRepository.findById(decoded.userId);
-    
+
     return user;
   }
 }

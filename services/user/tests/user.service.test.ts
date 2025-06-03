@@ -23,10 +23,10 @@ describe('UserService', () => {
     it('should call userRepository.create with the given data and return the created user', async () => {
       const newUserData: Partial<User> = { authUserId: 'newAuthId', email: 'test@example.com', name: 'Test User' };
       // Ensure the mock return value satisfies the User type if possible, or use Partial<User>
-      const expectedUser: User = { 
-        id: '1', 
-        authUserId: 'newAuthId', 
-        email: 'test@example.com', 
+      const expectedUser: User = {
+        id: '1',
+        authUserId: 'newAuthId',
+        email: 'test@example.com',
         name: 'Test User',
         emailVerified: null,
         image: null,
@@ -49,10 +49,10 @@ describe('UserService', () => {
   describe('checkExistingUser', () => {
     it('should call userRepository.findByAuthId with the given authUserId and return the result', async () => {
       const authUserId = 'existingAuthId';
-      const existingUser: User = { 
-        id: '1', 
-        authUserId: authUserId, 
-        email: 'exists@example.com', 
+      const existingUser: User = {
+        id: '1',
+        authUserId: authUserId,
+        email: 'exists@example.com',
         name: 'Existing User',
         emailVerified: null,
         image: null,
