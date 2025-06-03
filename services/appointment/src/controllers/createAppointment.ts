@@ -1,30 +1,31 @@
 import { Request, Response, NextFunction } from 'express';
-import { AppointmentCreateShcema } from '@/schemas';
-import appointmentService from '@/lib/AppointmentService';
+import { AppointmentCreateShcema } from '@/schemas'; // Corrected schema name based on file content
+import { IAppointmentService } from '@/lib/services/interfaces/IAppointmentService';
 
-const createAppointment = async (
+export default (appointmentService: IAppointmentService) => async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
     // Validate the request body
-    const parsedBody = AppointmentCreateShcema.safeParse(req.body);
+    const parsedBody = AppointmentCreateShcema.safeParse(req.body); // Using AppointmentCreateShcema
     if (!parsedBody.success) {
-      return res.status(400).json({ message: parsedBody.error.errors });
+      // Return a 400 error if validation fails
+      return res.status(400).json({ errors: parsedBody.error.errors });
     }
 
-    // Create the appointment
+    // Create the appointment using the injected service
     const appointment = await appointmentService.createAppointment(
       parsedBody.data
     );
 
+    // Return a 201 response with the created appointment
     return res
       .status(201)
       .json({ message: 'Appointment created successfully!', appointment });
   } catch (err) {
+    // Pass any errors to the error handling middleware
     next(err);
   }
 };
-
-export default createAppointment;

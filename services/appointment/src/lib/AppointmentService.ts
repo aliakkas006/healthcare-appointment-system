@@ -1,183 +1,209 @@
-import prisma from '@/config/prisma';
-import sendToQueue from '@/utils/queue';
-import redis from '@/config/redis';
+import { IAppointmentService } from "../services/interfaces/IAppointmentService";
+import { IAppointmentRepository } from "../repositories/interfaces/IAppointmentRepository";
+import { ICacheService } from "../services/interfaces/ICacheService";
+import { IMessageQueueService } from "../services/interfaces/IMessageQueueService";
+import { Appointment, Prisma } from "@prisma/client";
 import logger from '@/config/logger';
 
-class AppointmentService {
-  /**
-   * Create a new appointment
-   * Send an email notification to the patient
-   * Invalidate cache for all appointments
-   * @param appointmentData - Data for the new appointment
-   */
-  public async createAppointment(appointmentData: any) {
-    try {
-      const appointment = await prisma.appointment.create({
-        data: appointmentData,
-      });
+const APPOINTMENTS_CACHE_KEY = 'appointments';
+const APPOINTMENT_DETAIL_CACHE_PREFIX = 'appointment:';
+const APPOINTMENTS_PATIENT_CACHE_PREFIX = 'appointments:patient:';
+const APPOINTMENTS_PROVIDER_CACHE_PREFIX = 'appointments:provider:'; // For consistency if caching is added
+const APPOINTMENTS_DATE_CACHE_PREFIX = 'appointments:date:'; // For consistency if caching is added
 
-      await sendToQueue('send-email', JSON.stringify(appointment));
-      await redis.del('appointments');
+
+export class AppointmentService implements IAppointmentService {
+  private readonly appointmentRepository: IAppointmentRepository;
+  private readonly cacheService: ICacheService;
+  private readonly messageQueueService: IMessageQueueService;
+  private readonly defaultCacheTTL = 3600; // 1 hour in seconds, example
+
+  constructor(
+    appointmentRepository: IAppointmentRepository,
+    cacheService: ICacheService,
+    messageQueueService: IMessageQueueService
+  ) {
+    this.appointmentRepository = appointmentRepository;
+    this.cacheService = cacheService;
+    this.messageQueueService = messageQueueService;
+  }
+
+  async createAppointment(appointmentData: Prisma.AppointmentCreateInput): Promise<Appointment> {
+    try {
+      const appointment = await this.appointmentRepository.create(appointmentData);
+
+      // Publish to queue
+      // Assuming 'appointment_exchange' and routing key 'appointment.created'
+      // The original used queue 'send-email' and exchange 'appointment'
+      await this.messageQueueService.publish('appointment', 'send-email', JSON.stringify(appointment));
       
+      // Invalidate general appointments list cache
+      await this.cacheService.delete(APPOINTMENTS_CACHE_KEY);
+      // Consider invalidating patient/provider specific lists if necessary
+      if (appointment.patientId) {
+        await this.cacheService.delete(`${APPOINTMENTS_PATIENT_CACHE_PREFIX}${appointment.patientId}`);
+      }
+      if (appointment.providerId) {
+        await this.cacheService.delete(`${APPOINTMENTS_PROVIDER_CACHE_PREFIX}${appointment.providerId}`);
+      }
+      // Potentially also by date if that list is cached and frequently accessed
+      // await this.cacheService.delete(`${APPOINTMENTS_DATE_CACHE_PREFIX}${appointment.date}`);
+
+
       logger.info('Appointment created successfully:', appointment);
-
       return appointment;
     } catch (err) {
-      logger.error('Error creating appointment:', err);
+      logger.error('Error creating appointment in service:', err);
       throw err;
     }
   }
 
-  /**
-   * Get All appointments from cache or database
-   * Cache appointments data for future requests
-   */
-  public async getAppointments() {
+  async getAppointments(): Promise<Appointment[]> {
+    const cacheKey = APPOINTMENTS_CACHE_KEY;
     try {
-      // Check if appointments data is cached
-      const cachedAppointments = await redis.get('appointments');
+      const cachedAppointments = await this.cacheService.get<Appointment[]>(cacheKey);
       if (cachedAppointments) {
-        return JSON.parse(cachedAppointments);
+        logger.info('Appointments fetched from cache');
+        return cachedAppointments;
       }
 
-      // If not cached, fetch appointments from the database
-      const appointments = await prisma.appointment.findMany();
-
-      // Cache appointments data for future requests
-      await redis.set('appointments', JSON.stringify(appointments));
-
+      const appointments = await this.appointmentRepository.findMany();
+      await this.cacheService.set(cacheKey, appointments, this.defaultCacheTTL);
+      logger.info('Appointments fetched from repository and cached');
       return appointments;
     } catch (err) {
-      logger.error('Error fetching appointments:', err);
+      logger.error('Error fetching appointments in service:', err);
       throw err;
     }
   }
 
-  /**
-   * Get appointments by patientId
-   * Cache appointments data for future requests
-   */
-  public async getAppointmentsByPatientId(patientId: string) {
+  async getAppointmentsByPatientId(patientId: string): Promise<Appointment[]> {
+    const cacheKey = `${APPOINTMENTS_PATIENT_CACHE_PREFIX}${patientId}`;
     try {
-      // Check if appointments data is cached
-      const cachedAppointments = await redis.get(`appointments:${patientId}`);
+      const cachedAppointments = await this.cacheService.get<Appointment[]>(cacheKey);
       if (cachedAppointments) {
-        return JSON.parse(cachedAppointments);
+        logger.info(`Appointments for patient ${patientId} fetched from cache`);
+        return cachedAppointments;
       }
 
-      // If not cached, fetch appointments from the database
-      const appointments = await prisma.appointment.findMany({
-        where: { patientId },
-      });
-
-      // Cache appointments data for future requests
-      await redis.set(
-        `appointments:${patientId}`,
-        JSON.stringify(appointments)
-      );
-
+      const appointments = await this.appointmentRepository.findManyByPatientId(patientId);
+      await this.cacheService.set(cacheKey, appointments, this.defaultCacheTTL);
+      logger.info(`Appointments for patient ${patientId} fetched from repository and cached`);
       return appointments;
     } catch (err) {
-      logger.error('Error fetching appointments:', err);
+      logger.error(`Error fetching appointments for patient ${patientId} in service:`, err);
       throw err;
     }
   }
 
-  /**
-   * Get appointments by providerId
-   */
-  public async getAppointmentsByProviderId(providerId: string) {
-    return prisma.appointment.findMany({
-      where: { providerId },
-    });
-  }
-
-  /**
-   * Get appointment by appointmentId
-   * Cache appointment data for future requests
-   */
-  public async getAppointmentById(appointmentId: string) {
+  async getAppointmentById(appointmentId: string): Promise<Appointment | null> {
+    const cacheKey = `${APPOINTMENT_DETAIL_CACHE_PREFIX}${appointmentId}`;
     try {
-      // Check if appointment data is cached
-      const cachedAppointment = await redis.get(`appointment:${appointmentId}`);
+      const cachedAppointment = await this.cacheService.get<Appointment>(cacheKey);
       if (cachedAppointment) {
-        return JSON.parse(cachedAppointment);
+        logger.info(`Appointment ${appointmentId} fetched from cache`);
+        return cachedAppointment;
       }
 
-      // If not cached, fetch appointment from the database
-      const appointment = await prisma.appointment.findUnique({
-        where: { id: appointmentId },
-      });
-
-      // Cache appointment data for future requests
-      await redis.set(
-        `appointment:${appointmentId}`,
-        JSON.stringify(appointment)
-      );
-
+      const appointment = await this.appointmentRepository.findById(appointmentId);
+      if (appointment) {
+        await this.cacheService.set(cacheKey, appointment, this.defaultCacheTTL);
+        logger.info(`Appointment ${appointmentId} fetched from repository and cached`);
+      }
       return appointment;
     } catch (err) {
-      logger.error('Error fetching appointment:', err);
+      logger.error(`Error fetching appointment ${appointmentId} in service:`, err);
       throw err;
     }
   }
 
-  /**
-   * Update an appointment
-   * Invalidate cache for the updated appointment and all appointments
-   * @param appointmentId - Appointment ID
-   * @param appointmentData - Data to update the appointment
-   * @returns Updated appointment data
-   */
-  public async updateAppointment(appointmentId: string, appointmentData: any) {
+  async updateAppointment(appointmentId: string, appointmentData: Prisma.AppointmentUpdateInput): Promise<Appointment | null> {
     try {
-      const appointment = await prisma.appointment.update({
-        where: { id: appointmentId },
-        data: appointmentData,
-      });
+      const updatedAppointment = await this.appointmentRepository.update(appointmentId, appointmentData);
 
-      await redis.del(`appointment:${appointmentId}`);
-      await redis.del('appointments');
-
-      return appointment;
+      if (updatedAppointment) {
+        await this.cacheService.delete(`${APPOINTMENT_DETAIL_CACHE_PREFIX}${appointmentId}`);
+        await this.cacheService.delete(APPOINTMENTS_CACHE_KEY);
+        // Invalidate patient/provider specific lists
+        if (updatedAppointment.patientId) {
+          await this.cacheService.delete(`${APPOINTMENTS_PATIENT_CACHE_PREFIX}${updatedAppointment.patientId}`);
+        }
+        if (updatedAppointment.providerId) {
+          await this.cacheService.delete(`${APPOINTMENTS_PROVIDER_CACHE_PREFIX}${updatedAppointment.providerId}`);
+        }
+         // Potentially also by date
+        // await this.cacheService.delete(`${APPOINTMENTS_DATE_CACHE_PREFIX}${updatedAppointment.date}`);
+        logger.info(`Appointment ${appointmentId} updated successfully and caches invalidated.`);
+      }
+      return updatedAppointment;
     } catch (err) {
-      logger.error('Error updating appointment:', err);
+      logger.error(`Error updating appointment ${appointmentId} in service:`, err);
       throw err;
     }
   }
 
-  /**
-   * Delete an appointment
-   * Invalidate cache for the deleted appointment data and all appointments
-   * @param appointmentId - Appointment ID
-   * @returns Deleted appointment data
-   */
-  public async deleteAppointment(appointmentId: string) {
+  async deleteAppointment(appointmentId: string): Promise<Appointment | null> {
     try {
-      const appointment = await prisma.appointment.delete({
-        where: { id: appointmentId },
-      });
+      const deletedAppointment = await this.appointmentRepository.deleteById(appointmentId);
 
-      await redis.del(`appointment:${appointmentId}`);
-      await redis.del('appointments');
-
-      return appointment;
+      if (deletedAppointment) {
+        await this.cacheService.delete(`${APPOINTMENT_DETAIL_CACHE_PREFIX}${appointmentId}`);
+        await this.cacheService.delete(APPOINTMENTS_CACHE_KEY);
+         // Invalidate patient/provider specific lists
+        if (deletedAppointment.patientId) {
+          await this.cacheService.delete(`${APPOINTMENTS_PATIENT_CACHE_PREFIX}${deletedAppointment.patientId}`);
+        }
+        if (deletedAppointment.providerId) {
+          await this.cacheService.delete(`${APPOINTMENTS_PROVIDER_CACHE_PREFIX}${deletedAppointment.providerId}`);
+        }
+        // Potentially also by date
+        // await this.cacheService.delete(`${APPOINTMENTS_DATE_CACHE_PREFIX}${deletedAppointment.date}`);
+        logger.info(`Appointment ${appointmentId} deleted successfully and caches invalidated.`);
+      }
+      return deletedAppointment;
     } catch (err) {
-      logger.error('Error deleting appointment:', err);
+      logger.error(`Error deleting appointment ${appointmentId} in service:`, err);
       throw err;
     }
   }
 
-  /**
-   * Get appointments by date
-   */
-  public async getAppointmentsByDate(date: string) {
-    return prisma.appointment.findMany({
-      where: { date },
-    });
+  async getAppointmentsByProviderId(providerId: string): Promise<Appointment[]> {
+    // Caching for this method can be added if needed, similar to getAppointmentsByPatientId
+    const cacheKey = `${APPOINTMENTS_PROVIDER_CACHE_PREFIX}${providerId}`;
+    try {
+        const cachedAppointments = await this.cacheService.get<Appointment[]>(cacheKey);
+        if (cachedAppointments) {
+            logger.info(`Appointments for provider ${providerId} fetched from cache`);
+            return cachedAppointments;
+        }
+        const appointments = await this.appointmentRepository.findManyByProviderId(providerId);
+        await this.cacheService.set(cacheKey, appointments, this.defaultCacheTTL);
+        logger.info(`Appointments for provider ${providerId} fetched from repository and cached`);
+        return appointments;
+    } catch (err) {
+        logger.error(`Error fetching appointments for provider ${providerId} in service:`, err);
+        throw err;
+    }
+  }
+
+  async getAppointmentsByDate(date: string): Promise<Appointment[]> {
+    // Caching for this method can be added if needed
+    const cacheKey = `${APPOINTMENTS_DATE_CACHE_PREFIX}${date}`;
+     try {
+        const cachedAppointments = await this.cacheService.get<Appointment[]>(cacheKey);
+        if (cachedAppointments) {
+            logger.info(`Appointments for date ${date} fetched from cache`);
+            return cachedAppointments;
+        }
+        const appointments = await this.appointmentRepository.findManyByDate(date);
+        await this.cacheService.set(cacheKey, appointments, this.defaultCacheTTL);
+        logger.info(`Appointments for date ${date} fetched from repository and cached`);
+        return appointments;
+    } catch (err) {
+        logger.error(`Error fetching appointments for date ${date} in service:`, err);
+        throw err;
+    }
   }
 }
 
-const appointmentService = new AppointmentService();
-
-export default appointmentService;
+export default AppointmentService;
