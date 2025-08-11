@@ -1,4 +1,4 @@
-name: Build, Test and Push Docker Image
+name: Build, Test and Push Appointment Service
 
 on:
   push:
@@ -8,28 +8,20 @@ on:
 jobs:
   run-tests:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        service: [appointment, EHR, user, auth, email]
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
+      - uses: actions/checkout@v4
       - name: Cache node_modules
         uses: actions/cache@v3
         with:
-          path: services/${{ matrix.service }}/node_modules
-          key: ${{ runner.os }}-node-${{ matrix.service }}-${{ hashFiles(format('services/{0}/yarn.lock', matrix.service)) }}
+          path: services/appointment/node_modules
+          key: ${{ runner.os }}-node-appointment-${{ hashFiles('services/appointment/yarn.lock') }}
           restore-keys: |
-            ${{ runner.os }}-node-${{ matrix.service }}-
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
+            ${{ runner.os }}-node-appointment-
+      - uses: actions/setup-node@v4
         with:
           node-version: '21'
-
-      - name: Install dependencies and run tests for ${{ matrix.service }}
-        working-directory: services/${{ matrix.service }}
+      - name: Install dependencies and run tests
+        working-directory: services/appointment
         run: |
           yarn install --frozen-lockfile
           yarn test
@@ -38,111 +30,37 @@ jobs:
     needs: run-tests
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Qemu
-        uses: docker/setup-qemu-action@v3
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Build api-gateway
-        uses: docker/build-push-action@v5
+      - uses: actions/checkout@v4
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
         with:
-          context: ./api-gateway
-          file: ./api-gateway/Dockerfile
-          platforms: linux/amd64,linux/arm64
-          push: false
-          tags: ${{ secrets.DOCKER_USERNAME }}/api-gateway:latest,${{ secrets.DOCKER_USERNAME }}/api-gateway:${{ github.sha }}
-
-      - name: Build appointment service
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Build and push staging image
         uses: docker/build-push-action@v5
         with:
           context: ./services/appointment
           file: ./services/appointment/Dockerfile
           platforms: linux/amd64,linux/arm64
-          push: false
-          tags: ${{ secrets.DOCKER_USERNAME }}/appointment:latest,${{ secrets.DOCKER_USERNAME }}/appointment:${{ github.sha }}
-
-      - name: Build EHR service
-        uses: docker/build-push-action@v5
-        with:
-          context: ./services/EHR
-          file: ./services/EHR/Dockerfile
-          platforms: linux/amd64,linux/arm64
-          push: false
-          tags: ${{ secrets.DOCKER_USERNAME }}/ehr:latest,${{ secrets.DOCKER_USERNAME }}/ehr:${{ github.sha }}
-
-      - name: Build user service
-        uses: docker/build-push-action@v5
-        with:
-          context: ./services/user
-          file: ./services/user/Dockerfile
-          platforms: linux/amd64,linux/arm64
-          push: false
-          tags: ${{ secrets.DOCKER_USERNAME }}/user:latest,${{ secrets.DOCKER_USERNAME }}/user:${{ github.sha }}
-
-      - name: Build auth service
-        uses: docker/build-push-action@v5
-        with:
-          context: ./services/auth
-          file: ./services/auth/Dockerfile
-          platforms: linux/amd64,linux/arm64
-          push: false
-          tags: ${{ secrets.DOCKER_USERNAME }}/auth:latest,${{ secrets.DOCKER_USERNAME }}/auth:${{ github.sha }}
-
-      - name: Build email service
-        uses: docker/build-push-action@v5
-        with:
-          context: ./services/email
-          file: ./services/email/Dockerfile
-          platforms: linux/amd64,linux/arm64
-          push: false
-          tags: ${{ secrets.DOCKER_USERNAME }}/email:latest,${{ secrets.DOCKER_USERNAME }}/email:${{ github.sha }}
+          push: true
+          tags: |
+            ${{ secrets.DOCKER_USERNAME }}/appointment:staging-${{ github.sha }}
 
   push:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Login to DockerHub
-        uses: docker/login-action@v3
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-
-      - name: Push api-gateway
+      - name: Pull, tag and push final images
         run: |
-          docker push ${{ secrets.DOCKER_USERNAME }}/api-gateway:latest
-          docker push ${{ secrets.DOCKER_USERNAME }}/api-gateway:${{ github.sha }}
-
-      - name: Push appointment service
-        run: |
+          docker pull ${{ secrets.DOCKER_USERNAME }}/appointment:staging-${{ github.sha }}
+          docker tag ${{ secrets.DOCKER_USERNAME }}/appointment:staging-${{ github.sha }} ${{ secrets.DOCKER_USERNAME }}/appointment:latest
+          docker tag ${{ secrets.DOCKER_USERNAME }}/appointment:staging-${{ github.sha }} ${{ secrets.DOCKER_USERNAME }}/appointment:${{ github.sha }}
           docker push ${{ secrets.DOCKER_USERNAME }}/appointment:latest
           docker push ${{ secrets.DOCKER_USERNAME }}/appointment:${{ github.sha }}
-
-      - name: Push EHR service
-        run: |
-          docker push ${{ secrets.DOCKER_USERNAME }}/ehr:latest
-          docker push ${{ secrets.DOCKER_USERNAME }}/ehr:${{ github.sha }}
-
-      - name: Push user service
-        run: |
-          docker push ${{ secrets.DOCKER_USERNAME }}/user:latest
-          docker push ${{ secrets.DOCKER_USERNAME }}/user:${{ github.sha }}
-
-      - name: Push auth service
-        run: |
-          docker push ${{ secrets.DOCKER_USERNAME }}/auth:latest
-          docker push ${{ secrets.DOCKER_USERNAME }}/auth:${{ github.sha }}
-
-      - name: Push email service
-        run: |
-          docker push ${{ secrets.DOCKER_USERNAME }}/email:latest
-          docker push ${{ secrets.DOCKER_USERNAME }}/email:${{ github.sha }}
